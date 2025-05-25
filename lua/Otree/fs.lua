@@ -20,6 +20,16 @@ local function is_dir_empty(path)
 	return entry == nil
 end
 
+local function get_fd_binary()
+	local fd = vim.fn.executable("fd") == 1 and "fd" or (vim.fn.executable("fdfind") == 1 and "fdfind")
+	if not fd then
+		vim.notify("Neither 'fd' nor 'fdfind' is installed!", vim.log.levels.ERROR)
+		return nil
+	end
+	return fd
+end
+
+local fd = get_fd_binary()
 local function get_parent_path(path)
 	return path:match("^(.+)/[^/]+$")
 end
@@ -137,7 +147,7 @@ function M.scan_dir(dir)
 	local ignore_patterns = state.ignore_patterns or {}
 	local base = dir or vim.fn.getcwd()
 
-	local cmd = { "fd", "--max-depth", "1", "--absolute-path", "-t", "f", "-t", "d" }
+	local cmd = { fd, "--max-depth", "1", "--absolute-path", "-t", "f", "-t", "d" }
 
 	if show_hidden then
 		table.insert(cmd, "--hidden")
