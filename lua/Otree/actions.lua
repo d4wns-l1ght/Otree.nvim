@@ -1,6 +1,6 @@
-local state = require("treeoil.state")
-local fs = require("treeoil.fs")
-local ui = require("treeoil.ui")
+local state = require("Otree.state")
+local fs = require("Otree.fs")
+local ui = require("Otree.ui")
 
 local M = {}
 
@@ -212,7 +212,7 @@ function M.edit_dir()
 	local cursor = vim.api.nvim_win_get_cursor(state.win)
 	local line = cursor[1]
 	local node = state.nodes[line]
-	require("treeoil.float").open_float(node.parent_path)
+	require("Otree.float").open_float(node.parent_path)
 end
 
 function M.toggle_hidden()

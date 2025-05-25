@@ -6,7 +6,7 @@ M.win_size = nil
 M.prev_cur_pos = nil
 M.cwd = nil
 M.pwd = nil
-M.ns = vim.api.nvim_create_namespace("TreeOil")
+M.ns = vim.api.nvim_create_namespace("Otree")
 
 M.nodes = {}
 M.show_hidden = false

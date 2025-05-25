@@ -1,8 +1,8 @@
-local state = require("treeoil.state")
+local state = require("Otree.state")
 local M = {}
 
 function M.setup_keymaps(buf)
-	local actions = require("treeoil.actions")
+	local actions = require("Otree.actions")
 	for _, key in ipairs({ "i", "I", "a", "A", "o", "O", "c", "C", "s", "S", "r", "R" }) do
 		vim.keymap.set("n", key, "<Nop>", { buffer = buf })
 	end
@@ -23,13 +23,13 @@ function M.setup_keymaps(buf)
 end
 
 function M.setup_buffer_autocmds(buf)
-	local augroup = vim.api.nvim_create_augroup("TreeOilGroup", { clear = true })
+	local augroup = vim.api.nvim_create_augroup("OtreeGroup", { clear = true })
 
 	vim.api.nvim_create_autocmd("BufEnter", {
 		group = augroup,
 		callback = function(args)
 			local curr_win = vim.api.nvim_get_current_win()
-			if curr_win == state.win and args.buf ~= state.buf and vim.bo[args.buf].filetype ~= "treeoil" then
+			if curr_win == state.win and args.buf ~= state.buf and vim.bo[args.buf].filetype ~= "Otree" then
 				local target_win = vim.fn.win_getid(vim.fn.winnr("l"))
 				if vim.api.nvim_win_is_valid(target_win) then
 					vim.api.nvim_set_current_win(target_win)

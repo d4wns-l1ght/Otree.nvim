@@ -1,5 +1,5 @@
-local state = require("treeoil.state")
-local keymap = require("treeoil.keymap")
+local state = require("Otree.state")
+local keymap = require("Otree.keymap")
 
 local M = {}
 
@@ -11,7 +11,7 @@ local function render_nodes(filtered, lines, highlights)
 			line = i - 1,
 			col = 0,
 			len = #node.filename + 2,
-			hl = node.type == "Directory" and "Directory" or "Normal",
+			hl = node.type == "directory" and "Directory" or "Normal",
 		})
 	end
 end
@@ -70,12 +70,12 @@ end
 
 function M.create_buffer()
 	state.buf = vim.api.nvim_create_buf(false, true)
-	vim.api.nvim_buf_set_name(state.buf, "treeoil://" .. state.cwd)
+	vim.api.nvim_buf_set_name(state.buf, "Otree://" .. state.cwd)
 
 	local bo = vim.bo[state.buf]
 	bo.buftype = "nofile"
 	bo.bufhidden = "hide"
-	bo.filetype = "treeoil"
+	bo.filetype = "Otree"
 	bo.modifiable = false
 	bo.swapfile = false
 	keymap.setup_keymaps(state.buf)

@@ -1,4 +1,4 @@
-local state = require("treeoil.state")
+local state = require("Otree.state")
 local ok, devicons = pcall(require, "nvim-web-devicons")
 if not ok then
 	vim.api.nvim_buf_set_lines(vim.fn.expand("%:p:h"), 0, -1, false, {
@@ -9,7 +9,6 @@ end
 local M = {}
 local uv = vim.uv or vim.loop
 
-local fd_cache = {}
 local stat_cache = {}
 
 local function is_dir_empty(path)
@@ -71,7 +70,6 @@ local function cached_stat(path)
 end
 
 function M.clear_cache()
-	fd_cache = {}
 	stat_cache = {}
 end
 
@@ -139,19 +137,6 @@ function M.scan_dir(dir)
 	local ignore_patterns = state.ignore_patterns or {}
 	local base = dir or vim.fn.getcwd()
 
-	local cache_key = string.format(
-		"%s:%s:%s:%s",
-		base,
-		tostring(show_hidden),
-		tostring(show_ignore),
-		table.concat(ignore_patterns, ",")
-	)
-
-	local cached = fd_cache[cache_key]
-	if cached and (os.time() - cached.timestamp) < 1 then
-		return cached.result
-	end
-
 	local cmd = { "fd", "--max-depth", "1", "--absolute-path", "-t", "f", "-t", "d" }
 
 	if show_hidden then
@@ -192,14 +177,7 @@ function M.scan_dir(dir)
 		end
 	end
 
-	local sorted = sort_nodes(nodes)
-
-	fd_cache[cache_key] = {
-		result = sorted,
-		timestamp = os.time(),
-	}
-
-	return sorted
+	return sort_nodes(nodes)
 end
 
 return M

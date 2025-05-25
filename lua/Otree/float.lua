@@ -1,4 +1,4 @@
-local state = require("treeoil.state")
+local state = require("Otree.state")
 
 local ok, oil = pcall(require, "oil")
 if not ok then
@@ -30,7 +30,7 @@ function M._close()
 
 	M.inner_win_id = nil
 	M.outer_win_id = nil
-	require("treeoil.actions").refresh()
+	require("Otree.actions").refresh()
 end
 
 function M.open_float(path)
