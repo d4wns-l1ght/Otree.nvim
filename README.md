@@ -1,6 +1,6 @@
 ---
 
-# 🌲 Otree.nvim
+## 🌲 Otree.nvim
 
 **Otree.nvim** is a lightweight and customizable file tree explorer for [Neovim](https://neovim.io), built for speed, simplicity, and seamless user experience. It integrates tightly with [`oil.nvim`](https://github.com/stevearc/oil.nvim) and [`nvim-web-devicons`](https://github.com/nvim-tree/nvim-web-devicons) to provide an elegant and efficient file navigation workflow.
 
