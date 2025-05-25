@@ -1,7 +1,6 @@
 local state = require("Otree.state")
 local fs = require("Otree.fs")
 local ui = require("Otree.ui")
-
 local M = {}
 
 local function close_dir(node)
@@ -22,15 +21,31 @@ local function open_dir(node)
 	if not new_nodes or next(new_nodes) == nil then
 		return
 	end
+
+	local insert_index = nil
 	for i, item in ipairs(state.nodes) do
-		if item.full_path == new_nodes[1].parent_path then
-			for j, new_node in ipairs(new_nodes) do
-				new_node.level = item.level + 1
-				table.insert(state.nodes, i + j, new_node)
-			end
+		if item.full_path == node.full_path then
+			insert_index = i + 1
+			break
 		end
 	end
+
+	if insert_index then
+		for j, new_node in ipairs(new_nodes) do
+			new_node.level = node.level + 1
+			table.insert(state.nodes, insert_index + j - 1, new_node)
+		end
+	end
+
 	node.is_open = true
+end
+
+local function open_file(mode, file)
+	local target_win = vim.fn.win_getid(vim.fn.winnr("#"))
+	if vim.api.nvim_win_is_valid(target_win) then
+		vim.api.nvim_set_current_win(target_win)
+		vim.cmd(mode .. " " .. file)
+	end
 end
 
 function M.open_dirs()
@@ -74,11 +89,43 @@ function M.on_enter()
 		end
 		ui.render()
 	elseif node.type == "file" then
-		local target_win = vim.fn.win_getid(vim.fn.winnr("l"))
-		if vim.api.nvim_win_is_valid(target_win) then
-			vim.api.nvim_set_current_win(target_win)
-			vim.cmd("drop " .. node.path)
-		end
+		open_file("drop", node.path)
+	end
+end
+
+function M.open_tab()
+	local cursor = vim.api.nvim_win_get_cursor(state.win)
+	local line = cursor[1]
+	local node = state.nodes[line]
+	if not node then
+		return
+	end
+	if node.type == "file" then
+		open_file("tabedit", node.path)
+	end
+end
+
+function M.open_split()
+	local cursor = vim.api.nvim_win_get_cursor(state.win)
+	local line = cursor[1]
+	local node = state.nodes[line]
+	if not node then
+		return
+	end
+	if node.type == "file" then
+		open_file("split", node.path)
+	end
+end
+
+function M.open_vsplit()
+	local cursor = vim.api.nvim_win_get_cursor(state.win)
+	local line = cursor[1]
+	local node = state.nodes[line]
+	if not node then
+		return
+	end
+	if node.type == "file" then
+		open_file("vsplit", node.path)
 	end
 end
 
@@ -110,23 +157,77 @@ function M.on_close_dir()
 	vim.api.nvim_win_set_cursor(state.win, { math.max(line - 1, 1), 0 })
 end
 
-function M.toggle()
-	if M.close_win() then
-	else
-		if not (state.buf and vim.api.nvim_buf_is_valid(state.buf)) then
-			state.cwd = vim.fn.getcwd()
-			state.pwd = vim.fn.getcwd()
-			state.nodes = fs.scan_dir(state.cwd)
-			ui.create_buffer()
-			state.prev_cur_pos = nil
+function M.focus_file()
+	local prev_win_bufnr = vim.fn.winbufnr(vim.fn.winnr("#"))
+	local target_path = vim.api.nvim_buf_get_name(prev_win_bufnr)
+	if target_path == "" then
+		vim.notify("Otree: no previous window buffer to focus", vim.log.levels.WARN)
+		return
+	end
+	target_path = vim.fn.fnamemodify(target_path, ":p")
+	local segments = {}
+	local path = target_path
+	local prev_path = ""
+
+	while path ~= prev_path and path ~= "/" and path ~= "" do
+		table.insert(segments, 1, path)
+		prev_path = path
+		path = vim.fn.fnamemodify(path, ":h")
+	end
+
+	if path == "/" then
+		table.insert(segments, 1, "/")
+	end
+
+	for _, segment_path in ipairs(segments) do
+		local path_to_node = {}
+		for _, node in ipairs(state.nodes) do
+			path_to_node[node.full_path] = node
 		end
 
-		ui.create_window()
-		if state.prev_cur_pos then
-			vim.api.nvim_win_set_cursor(0, state.prev_cur_pos)
-		else
-			vim.api.nvim_win_set_cursor(0, { 1, 0 })
+		local node = path_to_node[segment_path]
+		if node and node.type == "directory" and not node.is_open then
+			open_dir(node)
 		end
+	end
+
+	for index, node in ipairs(state.nodes) do
+		if node.full_path == target_path then
+			M.refresh()
+			vim.api.nvim_win_set_cursor(state.win, { index, 0 })
+			return
+		end
+	end
+end
+
+function M.toggle_tree()
+	if M.close_win() then
+	else
+		M.open_win()
+	end
+end
+
+function M.focus_tree()
+	if state.win and vim.api.nvim_win_is_valid(state.win) then
+		vim.api.nvim_set_current_win(state.win)
+	else
+		M.open_win()
+	end
+end
+
+function M.open_win(path)
+	if not (state.buf and vim.api.nvim_buf_is_valid(state.buf)) then
+		state.cwd = path or state.pwd
+		state.nodes = fs.scan_dir(state.cwd)
+		ui.create_buffer()
+		state.prev_cur_pos = nil
+	end
+
+	ui.create_window()
+	if state.prev_cur_pos then
+		vim.api.nvim_win_set_cursor(0, state.prev_cur_pos)
+	else
+		vim.api.nvim_win_set_cursor(0, { 1, 0 })
 	end
 end
 
@@ -163,7 +264,7 @@ function M.change_pwd()
 	vim.cmd("cd " .. state.cwd)
 	state.pwd = state.cwd
 	fs.update_paths(state.nodes)
-	vim.notify("PWD: " .. state.cwd, vim.log.levels.INFO)
+	vim.notify("Otree: changed pwd to " .. state.cwd, vim.log.levels.INFO)
 end
 
 function M.goto_pwd()

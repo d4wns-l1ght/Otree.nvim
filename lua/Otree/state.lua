@@ -1,16 +1,8 @@
 local M = {}
 
-M.buf = nil
-M.win = nil
-M.win_size = nil
-M.prev_cur_pos = nil
-M.cwd = nil
-M.pwd = nil
+M.augroup = vim.api.nvim_create_augroup("OtreeGroup", { clear = true })
 M.ns = vim.api.nvim_create_namespace("Otree")
-
-M.nodes = {}
-M.show_hidden = false
-M.show_ignore = false
-M.ignore_patterns = {}
+M.buf_prefix = "Otree://"
+M.buf_filetype = "Otree"
 
 return M

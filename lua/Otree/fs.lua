@@ -1,14 +1,8 @@
 local state = require("Otree.state")
-local ok, devicons = pcall(require, "nvim-web-devicons")
-if not ok then
-	vim.api.nvim_buf_set_lines(vim.fn.expand("%:p:h"), 0, -1, false, {
-		"Error: devicons not installed",
-	})
-	return
-end
+local devicons = require("nvim-web-devicons")
 local M = {}
-local uv = vim.uv or vim.loop
 
+local uv = vim.uv or vim.loop
 local stat_cache = {}
 
 local function is_dir_empty(path)
@@ -20,16 +14,6 @@ local function is_dir_empty(path)
 	return entry == nil
 end
 
-local function get_fd_binary()
-	local fd = vim.fn.executable("fd") == 1 and "fd" or (vim.fn.executable("fdfind") == 1 and "fdfind")
-	if not fd then
-		vim.notify("Neither 'fd' nor 'fdfind' is installed!", vim.log.levels.ERROR)
-		return nil
-	end
-	return fd
-end
-
-local fd = get_fd_binary()
 local function get_parent_path(path)
 	return path:match("^(.+)/[^/]+$")
 end
@@ -87,11 +71,11 @@ local function get_icon(type, fullpath, filename)
 	local icon, icon_hl
 	if type == "directory" then
 		if is_dir_empty(fullpath) then
-			icon = ""
+			icon = state.icons.empty_dir
 		else
-			icon = ""
+			icon = state.icons.directory
 		end
-		icon_hl = "Directory"
+		icon_hl = state.highlights.directory
 	else
 		icon, icon_hl = devicons.get_icon(filename, nil, { default = true })
 	end
@@ -142,21 +126,17 @@ function M.update_paths(nodes)
 end
 
 function M.scan_dir(dir)
-	local show_hidden = state.show_hidden
-	local show_ignore = state.show_ignore
-	local ignore_patterns = state.ignore_patterns or {}
-	local base = dir or vim.fn.getcwd()
+	local base = dir or state.pwd
+	local cmd = { state.fd, "--max-depth", "1", "--absolute-path", "-t", "f", "-t", "d" }
 
-	local cmd = { fd, "--max-depth", "1", "--absolute-path", "-t", "f", "-t", "d" }
-
-	if show_hidden then
+	if state.show_hidden then
 		table.insert(cmd, "--hidden")
 	end
 
-	if show_ignore then
+	if state.show_ignore then
 		table.insert(cmd, "--no-ignore")
 	else
-		for _, pattern in ipairs(ignore_patterns) do
+		for _, pattern in ipairs(state.ignore_patterns) do
 			table.insert(cmd, "--exclude")
 			table.insert(cmd, pattern)
 		end
@@ -169,7 +149,7 @@ function M.scan_dir(dir)
 	local output = obj:wait()
 
 	if output.code ~= 0 then
-		vim.notify("fd failed to run in " .. base, vim.log.levels.ERROR)
+		vim.notify("Otree: fd failed to run in " .. base, vim.log.levels.ERROR)
 		return {}
 	end
 

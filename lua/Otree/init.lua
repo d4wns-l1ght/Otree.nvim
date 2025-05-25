@@ -2,21 +2,93 @@ local actions = require("Otree.actions")
 local state = require("Otree.state")
 local M = {}
 
-function M.setup(opts)
-	opts = opts or {}
+local default_config = {
+	win_size = 27,
+	open_on_startup = false,
+	hijack_netrw = true,
+	show_hidden = false,
+	show_ignore = false,
+	ignore_patterns = {},
+	cursorline = true,
+	keymaps = {
+		["<CR>"] = "actions.on_enter",
+		["l"] = "actions.on_enter",
+		["h"] = "actions.on_close_dir",
+		["q"] = "actions.close_win",
+		["<C-h>"] = "actions.goto_parent",
+		["<C-l>"] = "actions.goto_dir",
+		["<M-H>"] = "actions.goto_pwd",
+		["cd"] = "actions.change_pwd",
+		["L"] = "actions.open_dirs",
+		["H"] = "actions.close_dirs",
+		["o"] = "actions.edit_dir",
+		["st"] = "actions.open_tab",
+		["sv"] = "actions.open_vsplit",
+		["ss"] = "actions.open_split",
+		["s."] = "actions.toggle_hidden",
+		["si"] = "actions.toggle_ignore",
+		["r"] = "actions.refresh",
+		["sf"] = "actions.focus_file",
+	},
+	tree = {
+		connector_last = "└─",
+		connector_middle = "├─",
+		vertical_line = "│",
+		spacing = "  ",
+	},
+	icons = {
+		title = " ",
+		directory = "",
+		empty_dir = "",
+	},
+	highlights = {
+		directory = "Directory",
+		file = "Normal",
+		title = "TelescopeTitle",
+		tree = "Comment",
+		normal = "Normal",
+		float_normal = "TelescopeNormal",
+		float_border = "TelescopeBorder",
+	},
+	float = {
+		width_ratio = 0.4,
+		height_ratio = 0.7,
+		padding = 2,
+		cursorline = true,
+	},
+}
 
-	local ok_devicons, _ = pcall(require, "nvim-web-devicons")
-	if not ok_devicons then
-		vim.notify("Otree: nvim-web-devicons is required but not installed", vim.log.levels.ERROR)
-		return
-	end
+local function hijack_netrw(opts)
+	vim.g.loaded_netrw = 1
+	vim.g.loaded_netrwPlugin = 1
 
-	local ok_oil, oil = pcall(require, "oil")
-	if not ok_oil then
-		vim.notify("Otree: oil.nvim is required but not installed", vim.log.levels.ERROR)
-		return
-	end
+	vim.api.nvim_create_autocmd("VimEnter", {
+		nested = true,
+		callback = function()
+			local args = vim.fn.argv()
 
+			if #args == 0 then
+				if opts.open_on_startup then
+					actions.open_win(state.pwd)
+				end
+			elseif #args >= 1 and vim.fn.isdirectory(args[1]) == 1 then
+				vim.cmd("enew")
+				if vim.fn.bufexists(args[1]) == 1 then
+					vim.cmd("bwipeout " .. vim.fn.bufnr(args[1]))
+				end
+				if args[1] == "." then
+					actions.open_win(state.pwd)
+				elseif args[1] == ".." then
+					actions.open_win(state.pwd:match("^(.+)/[^/]+$"))
+				else
+					actions.open_win(state.pwd .. "/" .. args[1])
+				end
+			end
+		end,
+	})
+end
+
+local function setup_oil(oil)
 	oil.setup({
 		use_default_keymaps = false,
 		skip_confirm_for_simple_edits = true,
@@ -31,27 +103,53 @@ function M.setup(opts)
 			min_width = { 30 },
 		},
 	})
+end
 
-	state.show_hidden = opts.show_hidden or false
-	state.show_ignore = opts.show_ignore or false
-	state.ignore_patterns = opts.ignore_patterns or {}
-	state.win_size = opts.win_size or 27
+function M.setup(opts)
+	opts = vim.tbl_deep_extend("force", default_config, opts or {})
 
-	vim.api.nvim_create_user_command("Otree", actions.toggle, {})
+	local ok_devicons, _ = pcall(require, "nvim-web-devicons")
+	if not ok_devicons then
+		vim.notify("Otree: nvim-web-devicons is required but not installed", vim.log.levels.ERROR)
+		return
+	end
 
-	vim.g.loaded_netrw = 1
-	vim.g.loaded_netrwPlugin = 1
+	local ok_oil, oil = pcall(require, "oil")
+	if not ok_oil then
+		vim.notify("Otree: oil.nvim is required but not installed", vim.log.levels.ERROR)
+		return
+	end
 
-	vim.api.nvim_create_autocmd("VimEnter", {
-		callback = function()
-			local arg = vim.fn.argv(0)
-			if arg == "" or vim.fn.isdirectory(arg) == 1 then
-				if arg ~= "" then
-					vim.cmd("cd " .. arg)
-				end
-			end
-		end,
-	})
+	state.fd = vim.fn.executable("fd") == 1 and "fd" or (vim.fn.executable("fdfind") == 1 and "fdfind")
+	if not state.fd then
+		vim.notify("Otree : neither 'fd' nor 'fdfind' is installed!", vim.log.levels.ERROR)
+		return
+	end
+
+	state.pwd = vim.fn.getcwd()
+	local config_keys = {
+		"show_hidden",
+		"show_ignore",
+		"cursorline",
+		"ignore_patterns",
+		"keymaps",
+		"win_size",
+		"highlights",
+		"tree",
+		"icons",
+		"float",
+	}
+	for _, key in ipairs(config_keys) do
+		state[key] = opts[key]
+	end
+
+	vim.api.nvim_create_user_command("Otree", actions.toggle_tree, {})
+	vim.api.nvim_create_user_command("OtreeFocus", actions.focus_tree, {})
+
+	setup_oil(oil)
+	if opts.hijack_netrw then
+		hijack_netrw(opts)
+	end
 
 	return M
 end
