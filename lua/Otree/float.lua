@@ -84,10 +84,6 @@ local function format_path_for_title(path)
 	end
 end
 
-local function configure_oil()
-	config.view_options.show_hidden = state.show_hidden
-end
-
 local function configure_window_options()
 	vim.api.nvim_win_set_option(M.inner_win_id, "cursorline", state.float.cursorline)
 end
@@ -174,7 +170,6 @@ function M.open_float(path)
 
 	vim.api.nvim_set_current_win(M.inner_win_id)
 
-	configure_oil()
 	oil.open(path)
 	M._update_title(path)
 	configure_window_options()

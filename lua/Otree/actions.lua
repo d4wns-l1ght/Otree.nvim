@@ -319,6 +319,7 @@ end
 function M.toggle_hidden()
 	state.prev_cur_pos = nil
 	state.show_hidden = not state.show_hidden
+	require("oil").toggle_hidden()
 	M.refresh()
 end
 

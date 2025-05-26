@@ -93,10 +93,13 @@ local function setup_oil(oil)
 		use_default_keymaps = false,
 		skip_confirm_for_simple_edits = true,
 		delete_to_trash = true,
-		cleanup_delay_ms = 100,
+		cleanup_delay_ms = false,
 		default_file_explorer = false,
 		keymaps = {
 			["st"] = { "actions.toggle_trash", mode = "n" },
+		},
+		view_options = {
+			show_hidden = state.show_hidden,
 		},
 		confirmation = {
 			max_width = 0.9,
