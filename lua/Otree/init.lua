@@ -22,6 +22,7 @@ local default_config = {
 		["L"] = "actions.open_dirs",
 		["H"] = "actions.close_dirs",
 		["o"] = "actions.edit_dir",
+		["O"] = "actions.edit_into_dir",
 		["st"] = "actions.open_tab",
 		["sv"] = "actions.open_vsplit",
 		["ss"] = "actions.open_split",

@@ -313,7 +313,26 @@ function M.edit_dir()
 	local cursor = vim.api.nvim_win_get_cursor(state.win)
 	local line = cursor[1]
 	local node = state.nodes[line]
-	require("Otree.float").open_float(node.parent_path)
+	local path = state.cwd
+	if node then
+		path = node.parent_path
+	end
+	require("Otree.float").open_float(path)
+end
+
+function M.edit_into_dir()
+	local cursor = vim.api.nvim_win_get_cursor(state.win)
+	local line = cursor[1]
+	local node = state.nodes[line]
+	local path = state.cwd
+	if node then
+		if node.type == "directory" then
+			path = node.full_path
+		else
+			return
+		end
+	end
+	require("Otree.float").open_float(path)
 end
 
 function M.toggle_hidden()

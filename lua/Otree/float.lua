@@ -72,7 +72,7 @@ local function create_inner_window(geometry)
 end
 
 local function format_path_for_title(path)
-	local cwd = vim.fn.getcwd()
+	local cwd = state.cwd
 	path = vim.fn.expand(path):gsub("//+", "/")
 
 	if vim.startswith(path, cwd) then
