@@ -66,23 +66,33 @@ local function hijack_netrw(opts)
 		nested = true,
 		callback = function()
 			local args = vim.fn.argv()
-
 			if #args == 0 then
 				if opts.open_on_startup then
 					actions.open_win(state.pwd)
 				end
-			elseif #args >= 1 and vim.fn.isdirectory(args[1]) == 1 then
-				vim.cmd("enew")
-				if vim.fn.bufexists(args[1]) == 1 then
-					vim.cmd("bwipeout " .. vim.fn.bufnr(args[1]))
-				end
-				if args[1] == "." then
-					actions.open_win(state.pwd)
-				elseif args[1] == ".." then
-					actions.open_win(state.pwd:match("^(.+)/[^/]+$"))
+				return
+			end
+			local file_flag = false
+			local path = nil
+			for i = 1, #args do
+				if vim.fn.isdirectory(args[i]) == 1 then
+					if vim.fn.bufexists(args[i]) == 1 then
+						vim.cmd("bwipeout " .. vim.fn.bufnr(args[i]))
+					end
+					path = args[i]
 				else
-					actions.open_win(state.pwd .. "/" .. args[1])
+					file_flag = true
 				end
+			end
+			if not file_flag then
+				vim.cmd("enew")
+			end
+			if path == "." then
+				actions.open_win(state.pwd)
+			elseif path == ".." then
+				actions.open_win(state.pwd:match("^(.+)/[^/]+$"))
+			else
+				actions.open_win(state.pwd .. "/" .. path)
 			end
 		end,
 	})
