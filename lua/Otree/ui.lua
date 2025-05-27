@@ -37,7 +37,7 @@ local function create_tree_chunks(node, node_index, nodes)
 
 	for _ = 1, node.level do
 		table.insert(chunks, {
-			state.tree.vertical_line .. state.tree.spacing,
+			state.tree.vertical_line .. state.tree.connector_space,
 			state.highlights.tree,
 		})
 		npadding = npadding - 1
@@ -48,14 +48,14 @@ local function create_tree_chunks(node, node_index, nodes)
 	local padding = string.rep(" ", npadding)
 
 	table.insert(chunks, {
-		padding .. connector .. " ",
+		padding .. connector .. state.tree.space_after_connector,
 		state.highlights.tree,
 	})
 
 	local icon = node.icon
 	if icon then
 		table.insert(chunks, {
-			icon .. " ",
+			icon .. state.tree.space_after_icon,
 			node.icon_hl or state.highlights.normal,
 		})
 	end

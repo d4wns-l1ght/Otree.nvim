@@ -32,10 +32,12 @@ local default_config = {
 		["sf"] = "actions.focus_file",
 	},
 	tree = {
+		space_after_icon = " ",
+		space_after_connector = " ",
+		connector_space = "  ",
 		connector_last = "└─",
 		connector_middle = "├─",
 		vertical_line = "│",
-		spacing = "  ",
 	},
 	icons = {
 		title = " ",
