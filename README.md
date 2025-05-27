@@ -31,15 +31,15 @@ Using [`lazy.nvim`](https://github.com/folke/lazy.nvim):
 
 ```lua
 return {
-  "Eutrius/Otree.nvim",
-  lazy = false,
-  dependencies = {
-    "nvim-tree/nvim-web-devicons",
-    "stevearc/oil.nvim",
-  },
-  config = function()
-    require("Otree").setup()
-  end
+    "Eutrius/Otree.nvim",
+    lazy = false,
+    dependencies = {
+        "nvim-tree/nvim-web-devicons",
+        "stevearc/oil.nvim",
+    },
+    config = function()
+        require("Otree").setup()
+    end
 }
 ```
 
@@ -51,65 +51,68 @@ Here is the default configuration, which can be customized to suit your preferen
 
 ```lua
 require("Otree").setup({
-  win_size = 27,
-  open_on_startup = false,
-  hijack_netrw = true,
-  show_hidden = false,
-  show_ignore = false,
-  cursorline = true,
-
-  ignore_patterns = {},
-
-  keymaps = {
-    ["<CR>"] = "actions.on_enter",
-    ["l"] = "actions.on_enter",
-    ["h"] = "actions.on_close_dir",
-    ["q"] = "actions.close_win",
-    ["<C-h>"] = "actions.goto_parent",
-    ["<C-l>"] = "actions.goto_dir",
-    ["<M-H>"] = "actions.goto_pwd",
-    ["cd"] = "actions.change_pwd",
-    ["L"] = "actions.open_dirs",
-    ["H"] = "actions.close_dirs",
-    ["o"] = "actions.edit_dir",
-    ["st"] = "actions.open_tab",
-    ["sv"] = "actions.open_vsplit",
-    ["ss"] = "actions.open_split",
-    ["s."] = "actions.toggle_hidden",
-    ["si"] = "actions.toggle_ignore",
-    ["r"] = "actions.refresh",
-    ["sf"] = "actions.focus_file",
-  },
-
-  tree = {
-    connector_last = "└─",
-    connector_middle = "├─",
-    vertical_line = "│",
-    spacing = "  ",
-  },
-
-  icons = {
-    title = " ",
-    directory = "",
-    empty_dir = "",
-  },
-
-  highlights = {
-    directory = "Directory",
-    file = "Normal",
-    title = "TelescopeTitle",
-    tree = "Comment",
-    normal = "Normal",
-    float_normal = "TelescopeNormal",
-    float_border = "TelescopeBorder",
-  },
-
-  float = {
-    width_ratio = 0.4,
-    height_ratio = 0.7,
-    padding = 2,
+    win_size = 27,
+    open_on_startup = false,
+    hijack_netrw = true,
+    show_hidden = false,
+    show_ignore = false,
     cursorline = true,
-  },
+
+    ignore_patterns = {},
+
+    keymaps = {
+        ["<CR>"] = "actions.on_enter",
+        ["l"] = "actions.on_enter",
+        ["h"] = "actions.on_close_dir",
+        ["q"] = "actions.close_win",
+        ["<C-h>"] = "actions.goto_parent",
+        ["<C-l>"] = "actions.goto_dir",
+        ["<M-H>"] = "actions.goto_pwd",
+        ["cd"] = "actions.change_pwd",
+        ["L"] = "actions.open_dirs",
+        ["H"] = "actions.close_dirs",
+        ["o"] = "actions.edit_dir",
+        ["O"] = "actions.edit_into_dir",
+        ["st"] = "actions.open_tab",
+        ["sv"] = "actions.open_vsplit",
+        ["ss"] = "actions.open_split",
+        ["s."] = "actions.toggle_hidden",
+        ["si"] = "actions.toggle_ignore",
+        ["r"] = "actions.refresh",
+        ["sf"] = "actions.focus_file",
+    },
+
+    tree = {
+        space_after_icon = " ",
+        space_after_connector = " ",
+        connector_space = "  ",
+        connector_last = "└─",
+        connector_middle = "├─",
+        vertical_line = "│",
+    },
+
+    icons = {
+        title = " ",
+        directory = "",
+        empty_dir = "",
+    },
+
+    highlights = {
+        directory = "Directory",
+        file = "Normal",
+        title = "TelescopeTitle",
+        tree = "Comment",
+        normal = "Normal",
+        float_normal = "TelescopeNormal",
+        float_border = "TelescopeBorder",
+    },
+
+    float = {
+        width_ratio = 0.4,
+        height_ratio = 0.7,
+        padding = 2,
+        cursorline = true,
+    },
 })
 ```
 
@@ -128,7 +131,8 @@ require("Otree").setup({
 | `cd`        | Change working directory        |
 | `L`         | Expand all directories          |
 | `H`         | Collapse all directories        |
-| `o`         | Open selected directory in Oil  |
+| `o`         | Open parent directory in Oil    |
+| `O`         | Open selected directory in Oil  |
 | `st`        | Open file in new tab            |
 | `sv`        | Open file in vertical split     |
 | `ss`        | Open file in horizontal split   |
@@ -148,34 +152,24 @@ require("Otree").setup({
 
 ---
 
-## 🔧 Netrw Hijack
-
-When `hijack_netrw = true`, **Otree** automatically launches:
-
-- When Neovim is opened without a specific file
-- When opened in a directory (`nvim .`, `nvim ..`, etc.)
-- As a full replacement for Netrw
-
----
-
 ## 🛠 Oil.nvim Integration
 
 **Otree** utilizes `oil.nvim` for file operations. When both plugins are installed, a compatible default configuration for `oil.nvim` is applied automatically:
 
 ```lua
 require("oil").setup({
-  use_default_keymaps = false,
-  skip_confirm_for_simple_edits = true,
-  delete_to_trash = true,
-  cleanup_delay_ms = 100,
-  default_file_explorer = false,
-  keymaps = {
-    ["st"] = { "actions.toggle_trash", mode = "n" },
-  },
-  confirmation = {
-    max_width = 0.9,
-    min_width = { 30 },
-  },
+    use_default_keymaps = false,
+    skip_confirm_for_simple_edits = true,
+    delete_to_trash = true,
+    cleanup_delay_ms = false,
+    default_file_explorer = false,
+    keymaps = {
+        ["st"] = { "actions.toggle_trash", mode = "n" },
+    },
+    confirmation = {
+        max_width = 0.9,
+        min_width = { 30 },
+    },
 })
 ```
 
