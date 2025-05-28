@@ -51,8 +51,9 @@ Here is the default configuration, which can be customized to suit your preferen
 
 ```lua
 require("Otree").setup({
-    win_size = 27,
+    win_size = 30,
     open_on_startup = false,
+    use_default_keymaps = true,
     hijack_netrw = true,
     show_hidden = false,
     show_ignore = false,
@@ -67,19 +68,19 @@ require("Otree").setup({
         ["q"] = "actions.close_win",
         ["<C-h>"] = "actions.goto_parent",
         ["<C-l>"] = "actions.goto_dir",
-        ["<M-H>"] = "actions.goto_pwd",
+        ["<M-h>"] = "actions.goto_pwd",
         ["cd"] = "actions.change_pwd",
         ["L"] = "actions.open_dirs",
         ["H"] = "actions.close_dirs",
         ["o"] = "actions.edit_dir",
         ["O"] = "actions.edit_into_dir",
-        ["st"] = "actions.open_tab",
-        ["sv"] = "actions.open_vsplit",
-        ["ss"] = "actions.open_split",
-        ["s."] = "actions.toggle_hidden",
-        ["si"] = "actions.toggle_ignore",
+        ["t"] = "actions.open_tab",
+        ["v"] = "actions.open_vsplit",
+        ["s"] = "actions.open_split",
         ["r"] = "actions.refresh",
-        ["sf"] = "actions.focus_file",
+        ["f"] = "actions.focus_file",
+        ["."] = "actions.toggle_hidden",
+        ["i"] = "actions.toggle_ignore",
     },
 
     tree = {
@@ -163,9 +164,11 @@ require("oil").setup({
     delete_to_trash = true,
     cleanup_delay_ms = false,
     default_file_explorer = false,
+
     keymaps = {
         ["st"] = { "actions.toggle_trash", mode = "n" },
     },
+
     confirmation = {
         max_width = 0.9,
         min_width = { 30 },
@@ -178,15 +181,15 @@ require("oil").setup({
 ## 🧰 Troubleshooting
 
 - **Missing icons?**
-  Ensure `nvim-web-devicons` is installed and properly configured.
+Ensure `nvim-web-devicons` is installed and properly configured.
 
 - **Tree doesn't open on startup?**
-  Set `open_on_startup = true` in your setup.
+Set `open_on_startup = true` in your setup.
 
 - **Tree not showing for directories?**
-  Enable `hijack_netrw = true`.
+Enable `hijack_netrw = true`.
 
 - **Command not found: `fd`?**
-  Install [`fd`](https://github.com/sharkdp/fd) or its Debian/Ubuntu alias `fdfind`, and ensure it's in your system `$PATH`.
+Install [`fd`](https://github.com/sharkdp/fd) or its Debian/Ubuntu alias `fdfind`, and ensure it's in your system `$PATH`.
 
 ---

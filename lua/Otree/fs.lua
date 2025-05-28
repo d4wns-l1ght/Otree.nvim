@@ -18,42 +18,6 @@ local function get_parent_path(path)
 	return path:match("^(.+)/[^/]+$")
 end
 
-local function get_relative_path(full_path, cwd)
-	local function split(str, sep)
-		local result = {}
-		for part in str:gmatch("[^" .. sep .. "]+") do
-			table.insert(result, part)
-		end
-		return result
-	end
-
-	local function join(parts, sep)
-		return table.concat(parts, sep or "/")
-	end
-
-	local function relative_path(from, to)
-		local from_parts = split(vim.fn.resolve(from), "/")
-		local to_parts = split(vim.fn.resolve(to), "/")
-
-		local i = 1
-		while i <= #from_parts and i <= #to_parts and from_parts[i] == to_parts[i] do
-			i = i + 1
-		end
-
-		local up = {}
-		for _ = i, #from_parts do
-			table.insert(up, "..")
-		end
-		for j = i, #to_parts do
-			table.insert(up, to_parts[j])
-		end
-
-		return join(up)
-	end
-
-	return relative_path(cwd, full_path)
-end
-
 local function cached_stat(path)
 	if stat_cache[path] then
 		return stat_cache[path]
