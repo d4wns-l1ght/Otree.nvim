@@ -90,38 +90,24 @@ local function set_window_title()
 	vim.wo[state.win].winbar = "%#" .. state.highlights.title .. "#" .. state.icons.title .. cwd_name
 end
 
-function M.render()
-	local lines = {}
-	local highlights = {}
-	local nodes = state.nodes
-
-	render_basic_lines(nodes, lines, highlights)
-	set_buffer_content(lines, highlights)
-	add_tree_structure(nodes)
-	set_window_title()
-	vim.api.nvim_buf_set_option(state.buf, "modifiable", false)
-end
-
 local function configure_buffer_options()
-	local bo = vim.bo[state.buf]
-	bo.buftype = "nofile"
-	bo.bufhidden = "hide"
-	bo.filetype = state.buf_filetype
-	bo.modifiable = false
-	bo.swapfile = false
+	local buf_opts = {
+		buftype = "nofile",
+		bufhidden = "hide",
+		swapfile = false,
+		modifiable = false,
+		buflisted = false,
+		filetype = state.buf_filetype,
+	}
+
+	for opt, value in pairs(buf_opts) do
+		vim.api.nvim_set_option_value(opt, value, { scope = "local", buf = state.buf })
+	end
 end
 
 local function setup_buffer_behavior()
 	keymap.setup_keymaps(state.buf)
 	keymap.setup_buffer_autocmds(state.buf)
-end
-
-function M.create_buffer()
-	state.buf = vim.api.nvim_create_buf(false, true)
-	vim.api.nvim_buf_set_name(state.buf, state.buf_prefix .. state.cwd)
-
-	configure_buffer_options()
-	setup_buffer_behavior()
 end
 
 local function configure_window_options()
@@ -139,6 +125,26 @@ local function configure_window_options()
 	for opt, value in pairs(win_opts) do
 		vim.api.nvim_set_option_value(opt, value, { scope = "local", win = state.win })
 	end
+end
+
+function M.render()
+	local lines = {}
+	local highlights = {}
+	local nodes = state.nodes
+
+	render_basic_lines(nodes, lines, highlights)
+	set_buffer_content(lines, highlights)
+	add_tree_structure(nodes)
+	set_window_title()
+	vim.api.nvim_buf_set_option(state.buf, "modifiable", false)
+end
+
+function M.create_buffer()
+	state.buf = vim.api.nvim_create_buf(false, true)
+	vim.api.nvim_buf_set_name(state.buf, state.buf_prefix .. state.cwd)
+
+	configure_buffer_options()
+	setup_buffer_behavior()
 end
 
 function M.create_window()

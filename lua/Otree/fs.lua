@@ -63,10 +63,6 @@ local function cached_stat(path)
 	return stat
 end
 
-function M.clear_cache()
-	stat_cache = {}
-end
-
 local function get_icon(type, fullpath, filename)
 	local icon, icon_hl
 	if type == "directory" then
@@ -90,7 +86,6 @@ local function make_node(full_path, base, type)
 
 	return {
 		filename = filename,
-		path = get_relative_path(full_path, state.pwd),
 		full_path = full_path,
 		parent_path = get_parent_path(full_path),
 		type = type,
@@ -103,13 +98,12 @@ end
 
 local function sort_nodes(nodes)
 	local function compare_nodes(a, b)
-		local isaDir = a.type == "directory"
-		local isbDir = b.type == "directory"
-		if isaDir ~= isbDir then
-			return isaDir
-		else
-			return a.full_path < b.full_path
+		if a.type == "directory" and b.type ~= "directory" then
+			return true
+		elseif a.type ~= "directory" and b.type == "directory" then
+			return false
 		end
+		return a.full_path < b.full_path
 	end
 	local result = {}
 	for _, node in ipairs(nodes) do
@@ -119,20 +113,12 @@ local function sort_nodes(nodes)
 	return result
 end
 
-function M.update_paths(nodes)
-	for _, node in ipairs(nodes) do
-		node.path = get_relative_path(node.full_path, state.pwd)
-	end
-end
-
 function M.scan_dir(dir)
-	local base = dir or state.pwd
+	dir = dir or vim.fn.getcwd()
 	local cmd = { state.fd, "--max-depth", "1", "--absolute-path", "-t", "f", "-t", "d" }
-
 	if state.show_hidden then
 		table.insert(cmd, "--hidden")
 	end
-
 	if state.show_ignore then
 		table.insert(cmd, "--no-ignore")
 	else
@@ -141,27 +127,21 @@ function M.scan_dir(dir)
 			table.insert(cmd, pattern)
 		end
 	end
-
 	table.insert(cmd, ".")
-	table.insert(cmd, base)
-
-	local obj = vim.system(cmd, { cwd = base, text = true })
-	local output = obj:wait()
-
-	if output.code ~= 0 then
-		vim.notify("Otree: fd failed to run in " .. base, vim.log.levels.ERROR)
+	table.insert(cmd, dir)
+	local paths = vim.system(cmd, { cwd = dir, text = true }):wait()
+	if paths.code ~= 0 then
+		vim.notify("Otree: fd failed to run in " .. dir, vim.log.levels.ERROR)
 		return {}
 	end
-
-	local result = vim.split(output.stdout or "", "\n", { trimempty = true })
+	paths = vim.split(paths.stdout or "", "\n", { trimempty = true })
 	local nodes = {}
-
-	for _, full_path in ipairs(result) do
-		if full_path ~= base then
-			full_path = full_path:gsub("/$", "")
-			local stat = cached_stat(full_path)
+	for _, path in ipairs(paths) do
+		if path ~= dir then
+			path = path:gsub("/$", "")
+			local stat = cached_stat(path)
 			if stat then
-				local node = make_node(full_path, base, stat.type)
+				local node = make_node(path, dir, stat.type)
 				table.insert(nodes, node)
 			end
 		end

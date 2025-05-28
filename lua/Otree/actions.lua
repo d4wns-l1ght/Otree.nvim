@@ -40,33 +40,35 @@ local function open_dir(node)
 	node.is_open = true
 end
 
-local function open_file(mode, file)
+local function open_file(mode, node)
 	local target_win = vim.fn.win_getid(vim.fn.winnr("#"))
 	if vim.api.nvim_win_is_valid(target_win) then
 		vim.api.nvim_set_current_win(target_win)
-		vim.cmd(mode .. " " .. file)
+		vim.cmd(mode .. " " .. node.full_path)
 	end
 end
 
-function M.open_dirs()
+local function get_node()
 	local cursor = vim.api.nvim_win_get_cursor(state.win)
 	local line = cursor[1]
-	local item = state.nodes[line]
-	for _, node in ipairs(state.nodes) do
-		if node.parent_path == item.parent_path and node.type == "directory" and not node.is_open then
-			open_dir(node)
+	return state.nodes[line]
+end
+
+function M.open_dirs()
+	local node = get_node()
+	for _, item in ipairs(state.nodes) do
+		if node.parent_path == item.parent_path and item.type == "directory" and not item.is_open then
+			open_dir(item)
 		end
 	end
 	ui.render()
 end
 
 function M.close_dirs()
-	local cursor = vim.api.nvim_win_get_cursor(state.win)
-	local line = cursor[1]
-	local item = state.nodes[line]
-	for _, node in ipairs(state.nodes) do
-		if node.parent_path == item.parent_path and node.type == "directory" and node.is_open then
-			close_dir(node)
+	local node = get_node()
+	for _, item in ipairs(state.nodes) do
+		if node.parent_path == item.parent_path and item.type == "directory" and not item.is_open then
+			close_dir(item)
 		end
 	end
 	ui.render()
@@ -89,43 +91,37 @@ function M.on_enter()
 		end
 		ui.render()
 	elseif node.type == "file" then
-		open_file("drop", node.path)
+		open_file("drop", node)
 	end
 end
 
 function M.open_tab()
-	local cursor = vim.api.nvim_win_get_cursor(state.win)
-	local line = cursor[1]
-	local node = state.nodes[line]
+	local node = get_node()
 	if not node then
 		return
 	end
 	if node.type == "file" then
-		open_file("tabedit", node.path)
+		open_file("tabedit", node)
 	end
 end
 
 function M.open_split()
-	local cursor = vim.api.nvim_win_get_cursor(state.win)
-	local line = cursor[1]
-	local node = state.nodes[line]
+	local node = get_node()
 	if not node then
 		return
 	end
 	if node.type == "file" then
-		open_file("split", node.path)
+		open_file("split", node)
 	end
 end
 
 function M.open_vsplit()
-	local cursor = vim.api.nvim_win_get_cursor(state.win)
-	local line = cursor[1]
-	local node = state.nodes[line]
+	local node = get_node()
 	if not node then
 		return
 	end
 	if node.type == "file" then
-		open_file("vsplit", node.path)
+		open_file("vsplit", node)
 	end
 end
 
@@ -217,7 +213,7 @@ end
 
 function M.open_win(path)
 	if not (state.buf and vim.api.nvim_buf_is_valid(state.buf)) then
-		state.cwd = path or state.pwd
+		state.cwd = path or vim.fn.getcwd()
 		state.nodes = fs.scan_dir(state.cwd)
 		ui.create_buffer()
 		state.prev_cur_pos = nil
@@ -261,16 +257,13 @@ function M.refresh()
 end
 
 function M.change_pwd()
-	vim.cmd("cd " .. state.cwd)
-	state.pwd = state.cwd
-	fs.update_paths(state.nodes)
+	vim.fn.chdir(state.cwd)
 	vim.notify("Otree: changed pwd to " .. state.cwd, vim.log.levels.INFO)
 end
 
 function M.goto_pwd()
 	state.prev_cur_pos = nil
-	state.pwd = vim.fn.getcwd()
-	state.cwd = state.pwd
+	state.cwd = vim.fn.getcwd()
 	state.nodes = fs.scan_dir(state.cwd)
 	ui.render()
 end
@@ -297,9 +290,10 @@ function M.goto_parent()
 end
 
 function M.goto_dir()
-	local cursor = vim.api.nvim_win_get_cursor(state.win)
-	local line = cursor[1]
-	local node = state.nodes[line]
+	local node = get_node()
+	if not node then
+		return
+	end
 	if node.type == "directory" then
 		state.cwd = node.full_path
 	else
@@ -310,9 +304,7 @@ function M.goto_dir()
 end
 
 function M.edit_dir()
-	local cursor = vim.api.nvim_win_get_cursor(state.win)
-	local line = cursor[1]
-	local node = state.nodes[line]
+	local node = get_node()
 	local path = state.cwd
 	if node then
 		path = node.parent_path
@@ -321,9 +313,7 @@ function M.edit_dir()
 end
 
 function M.edit_into_dir()
-	local cursor = vim.api.nvim_win_get_cursor(state.win)
-	local line = cursor[1]
-	local node = state.nodes[line]
+	local node = get_node()
 	local path = state.cwd
 	if node then
 		if node.type == "directory" then

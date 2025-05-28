@@ -38,7 +38,15 @@ local function should_quit_on_last_window()
 	end
 
 	local wins = vim.api.nvim_tabpage_list_wins(0)
-	return #wins == 1 and wins[1] == state.win
+	local non_floating_wins = {}
+
+	for _, win in ipairs(wins) do
+		local config = vim.api.nvim_win_get_config(win)
+		if config.relative == "" then
+			table.insert(non_floating_wins, win)
+		end
+	end
+	return #non_floating_wins == 1 and non_floating_wins[1] == state.win
 end
 
 local function handle_window_cleanup()

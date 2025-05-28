@@ -1,6 +1,5 @@
 local state = require("Otree.state")
 local oil = require("oil")
-local config = require("oil.config")
 local M = {}
 
 M.outer_win_id = nil

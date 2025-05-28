@@ -3,8 +3,9 @@ local state = require("Otree.state")
 local M = {}
 
 local default_config = {
-	win_size = 27,
+	win_size = 30,
 	open_on_startup = false,
+	use_default_keymaps = true,
 	hijack_netrw = true,
 	show_hidden = false,
 	show_ignore = false,
@@ -17,19 +18,19 @@ local default_config = {
 		["q"] = "actions.close_win",
 		["<C-h>"] = "actions.goto_parent",
 		["<C-l>"] = "actions.goto_dir",
-		["<M-H>"] = "actions.goto_pwd",
+		["<M-h>"] = "actions.goto_pwd",
 		["cd"] = "actions.change_pwd",
 		["L"] = "actions.open_dirs",
 		["H"] = "actions.close_dirs",
 		["o"] = "actions.edit_dir",
 		["O"] = "actions.edit_into_dir",
-		["st"] = "actions.open_tab",
-		["sv"] = "actions.open_vsplit",
-		["ss"] = "actions.open_split",
-		["s."] = "actions.toggle_hidden",
-		["si"] = "actions.toggle_ignore",
+		["t"] = "actions.open_tab",
+		["v"] = "actions.open_vsplit",
+		["s"] = "actions.open_split",
 		["r"] = "actions.refresh",
-		["sf"] = "actions.focus_file",
+		["f"] = "actions.focus_file",
+		["."] = "actions.toggle_hidden",
+		["i"] = "actions.toggle_ignore",
 	},
 	tree = {
 		space_after_icon = " ",
@@ -69,9 +70,10 @@ local function hijack_netrw(opts)
 		nested = true,
 		callback = function()
 			local args = vim.fn.argv()
+			local pwd = vim.fn.getcwd()
 			if #args == 0 then
 				if opts.open_on_startup then
-					actions.open_win(state.pwd)
+					actions.open_win(pwd)
 				end
 				return
 			end
@@ -91,11 +93,11 @@ local function hijack_netrw(opts)
 				vim.cmd("enew")
 			end
 			if path == "." then
-				actions.open_win(state.pwd)
+				actions.open_win(pwd)
 			elseif path == ".." then
-				actions.open_win(state.pwd:match("^(.+)/[^/]+$"))
+				actions.open_win(pwd:match("^(.+)/[^/]+$"))
 			else
-				actions.open_win(state.pwd .. "/" .. path)
+				actions.open_win(pwd .. "/" .. path)
 			end
 		end,
 	})
@@ -122,8 +124,6 @@ local function setup_oil(oil)
 end
 
 function M.setup(opts)
-	opts = vim.tbl_deep_extend("force", default_config, opts or {})
-
 	local ok_devicons, _ = pcall(require, "nvim-web-devicons")
 	if not ok_devicons then
 		vim.notify("Otree: nvim-web-devicons is required but not installed", vim.log.levels.ERROR)
@@ -142,7 +142,12 @@ function M.setup(opts)
 		return
 	end
 
-	state.pwd = vim.fn.getcwd()
+	opts = vim.tbl_deep_extend("force", default_config, opts or {})
+
+	if not opts.use_default_keymaps then
+		opts["keymaps"] = {}
+	end
+
 	local config_keys = {
 		"show_hidden",
 		"show_ignore",
@@ -155,6 +160,7 @@ function M.setup(opts)
 		"icons",
 		"float",
 	}
+
 	for _, key in ipairs(config_keys) do
 		state[key] = opts[key]
 	end
