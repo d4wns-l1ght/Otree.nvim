@@ -101,7 +101,7 @@ local function configure_buffer_options()
 	}
 
 	for opt, value in pairs(buf_opts) do
-		vim.api.nvim_set_option_value(opt, value, { scope = "local", buf = state.buf })
+		vim.api.nvim_set_option_value(opt, value, { buf = state.buf })
 	end
 end
 
