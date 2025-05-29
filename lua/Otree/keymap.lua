@@ -32,7 +32,7 @@ local function handle_buffer_redirection(args)
 	end
 end
 
-local function should_quit_on_last_window()
+local function check_last_window()
 	if not (state.win and vim.api.nvim_win_is_valid(state.win)) then
 		return false
 	end
@@ -58,13 +58,26 @@ local function handle_window_cleanup()
 	end
 end
 
-local function handle_window_enter()
-	if should_quit_on_last_window() then
-		vim.cmd("silent! quit!")
-		return
+local function check_modified_buffers()
+	for _, bufnr in ipairs(vim.api.nvim_list_bufs()) do
+		if vim.api.nvim_buf_is_loaded(bufnr) and vim.api.nvim_buf_get_option(bufnr, "modified") then
+			return true
+		end
 	end
+	return false
+end
 
-	handle_window_cleanup()
+local function handle_window_enter()
+	if check_last_window() then
+		if check_modified_buffers() then
+			vim.api.nvim_buf_delete(state.buf, { force = true })
+			state.win = nil
+		else
+			vim.cmd("silent! quit!")
+		end
+	else
+		handle_window_cleanup()
+	end
 end
 
 local function create_buffer_enter_autocmd(augroup)
