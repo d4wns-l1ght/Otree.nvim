@@ -67,7 +67,7 @@ end
 function M.close_dirs()
 	local node = get_node()
 	for _, item in ipairs(state.nodes) do
-		if node.parent_path == item.parent_path and item.type == "directory" and not item.is_open then
+		if node.parent_path == item.parent_path and item.type == "directory" and not item.is_close then
 			close_dir(item)
 		end
 	end
