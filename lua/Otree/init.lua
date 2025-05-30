@@ -96,7 +96,7 @@ local function hijack_netrw(opts)
 				actions.open_win(pwd)
 			elseif path == ".." then
 				actions.open_win(pwd:match("^(.+)/[^/]+$"))
-			else
+			elseif path then
 				actions.open_win(pwd .. "/" .. path)
 			end
 		end,
