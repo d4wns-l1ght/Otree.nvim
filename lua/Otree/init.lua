@@ -124,28 +124,43 @@ local function setup_oil(oil)
 end
 
 function M.setup(opts)
+	opts = opts or {}
+
 	local ok_devicons, _ = pcall(require, "nvim-web-devicons")
 	if not ok_devicons then
-		vim.notify("Otree: nvim-web-devicons is required but not installed", vim.log.levels.ERROR)
+		vim.notify(
+			"Otree: nvim-web-devicons is required but not installed",
+			vim.log.levels.ERROR
+		)
 		return
 	end
 
 	local ok_oil, oil = pcall(require, "oil")
 	if not ok_oil then
-		vim.notify("Otree: oil.nvim is required but not installed", vim.log.levels.ERROR)
+		vim.notify(
+			"Otree: oil.nvim is required but not installed",
+			vim.log.levels.ERROR
+		)
 		return
 	end
 
-	state.fd = vim.fn.executable("fd") == 1 and "fd" or (vim.fn.executable("fdfind") == 1 and "fdfind")
+	state.fd = vim.fn.executable("fd") == 1 and "fd"
+		or (vim.fn.executable("fdfind") == 1 and "fdfind")
 	if not state.fd then
-		vim.notify("Otree : neither 'fd' nor 'fdfind' is installed!", vim.log.levels.ERROR)
+		vim.notify(
+			"Otree : neither 'fd' nor 'fdfind' is installed!",
+			vim.log.levels.ERROR
+		)
 		return
 	end
 
-	opts = vim.tbl_deep_extend("force", default_config, opts or {})
+	local user_keymaps = opts.keymaps
+	local disable_default_km = (opts.use_default_keymaps == false)
 
-	if not opts.use_default_keymaps then
-		opts["keymaps"] = {}
+	opts = vim.tbl_deep_extend("force", default_config, opts)
+
+	if disable_default_km then
+		opts.keymaps = user_keymaps or {}
 	end
 
 	local config_keys = {
