@@ -77,10 +77,10 @@ require("Otree").setup({
         ["t"] = "actions.open_tab",
         ["v"] = "actions.open_vsplit",
         ["s"] = "actions.open_split",
-        ["r"] = "actions.refresh",
-        ["f"] = "actions.focus_file",
         ["."] = "actions.toggle_hidden",
         ["i"] = "actions.toggle_ignore",
+        ["r"] = "actions.refresh",
+        ["f"] = "actions.focus_file",
     },
 
     tree = {
@@ -121,26 +121,26 @@ require("Otree").setup({
 
 ## 🗝️ Keybindings
 
-| Keybinding  | Action                          |
-| ----------- | ------------------------------- |
-| `<CR>`, `l` | Open file or expand folder      |
-| `h`         | Collapse folder                 |
-| `q`         | Close file tree window          |
-| `<C-h>`     | Navigate to parent directory    |
-| `<C-l>`     | Enter selected directory        |
-| `<M-H>`     | Go to current working directory |
-| `cd`        | Change working directory        |
-| `L`         | Expand all directories          |
-| `H`         | Collapse all directories        |
-| `o`         | Open parent directory in Oil    |
-| `O`         | Open selected directory in Oil  |
-| `st`        | Open file in new tab            |
-| `sv`        | Open file in vertical split     |
-| `ss`        | Open file in horizontal split   |
-| `s.`        | Toggle hidden files visibility  |
-| `si`        | Toggle ignored files visibility |
-| `r`         | Refresh tree view               |
-| `sf`        | Focus on currently open file    |
+| Keybinding  | Action                                  |
+| ----------- | --------------------------------------- |
+| `<CR>`, `l` | Open file or expand folder              |
+| `h`         | Close selected directory                |
+| `q`         | Close file tree window                  |
+| `<C-h>`     | Navigate to parent directory            |
+| `<C-l>`     | Enter selected directory                |
+| `<M-h>`     | Go to home directory                    |
+| `cd`        | Change home directory                   |
+| `L`         | Open all directories at the same level  |
+| `H`         | Close all directories at the same level |
+| `o`         | Open parent directory in Oil            |
+| `O`         | Open selected directory in Oil          |
+| `t`         | Open file in new tab                    |
+| `v`         | Open file in vertical split             |
+| `s`         | Open file in horizontal split           |
+| `.`         | Toggle hidden files visibility          |
+| `i`         | Toggle ignored files visibility         |
+| `r`         | Refresh tree view                       |
+| `f`         | Focus on currently open file            |
 
 ---
 
@@ -166,7 +166,8 @@ require("oil").setup({
     default_file_explorer = false,
 
     keymaps = {
-        ["st"] = { "actions.toggle_trash", mode = "n" },
+        ["t"] = { "actions.toggle_trash", mode = "n" },
+        ["."] = { "actions.toggle_hidden", mode = "n" },
     },
 
     confirmation = {
@@ -181,15 +182,15 @@ require("oil").setup({
 ## 🧰 Troubleshooting
 
 - **Missing icons?**
-Ensure `nvim-web-devicons` is installed and properly configured.
+  Ensure `nvim-web-devicons` is installed and properly configured.
 
 - **Tree doesn't open on startup?**
-Set `open_on_startup = true` in your setup.
+  Set `open_on_startup = true` in your setup.
 
 - **Tree not showing for directories?**
-Enable `hijack_netrw = true`.
+  Enable `hijack_netrw = true`.
 
 - **Command not found: `fd`?**
-Install [`fd`](https://github.com/sharkdp/fd) or its Debian/Ubuntu alias `fdfind`, and ensure it's in your system `$PATH`.
+  Install [`fd`](https://github.com/sharkdp/fd) or its Debian/Ubuntu alias `fdfind`, and ensure it's in your system `$PATH`.
 
 ---
