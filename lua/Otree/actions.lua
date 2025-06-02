@@ -157,7 +157,7 @@ function M.focus_file()
 	local prev_win_bufnr = vim.fn.winbufnr(vim.fn.winnr("#"))
 	local target_path = vim.api.nvim_buf_get_name(prev_win_bufnr)
 	if target_path == "" then
-		vim.notify("Otree: no previous window buffer to focus", vim.log.levels.WARN)
+		vim.notify("Otree: failed to focus previous buffer", vim.log.levels.WARN)
 		return
 	end
 	target_path = vim.fn.fnamemodify(target_path, ":p")
@@ -232,36 +232,39 @@ function M.close_win()
 		state.prev_cur_pos = vim.api.nvim_win_get_cursor(state.win)
 		vim.api.nvim_win_close(state.win, true)
 		state.win = nil
+		require("Otree.float").close_float()
 		return true
 	end
 	return false
 end
 
 function M.refresh()
-	local open_dirs = {}
-	if state.nodes then
-		for _, node in ipairs(state.nodes) do
-			if node.type == "directory" and node.is_open then
-				open_dirs[node.full_path] = true
+	if state.win and vim.api.nvim_win_is_valid(state.win) then
+		local open_dirs = {}
+		if state.nodes then
+			for _, node in ipairs(state.nodes) do
+				if node.type == "directory" and node.is_open then
+					open_dirs[node.full_path] = true
+				end
 			end
 		end
-	end
-	state.nodes = fs.scan_dir(state.cwd)
-	for _, node in ipairs(state.nodes) do
-		if node.type == "directory" and open_dirs[node.full_path] then
-			open_dir(node)
+		state.nodes = fs.scan_dir(state.cwd)
+		for _, node in ipairs(state.nodes) do
+			if node.type == "directory" and open_dirs[node.full_path] then
+				open_dir(node)
+			end
 		end
+
+		ui.render()
 	end
-
-	ui.render()
 end
 
-function M.change_pwd()
+function M.change_home_dir()
 	vim.fn.chdir(state.cwd)
-	vim.notify("Otree: changed pwd to " .. state.cwd, vim.log.levels.INFO)
+	vim.notify("Otree: changed home directory to " .. state.cwd, vim.log.levels.INFO)
 end
 
-function M.goto_pwd()
+function M.goto_home_dir()
 	state.prev_cur_pos = nil
 	state.cwd = vim.fn.getcwd()
 	state.nodes = fs.scan_dir(state.cwd)
@@ -309,7 +312,7 @@ function M.edit_dir()
 	if node then
 		path = node.parent_path
 	end
-	require("Otree.float").open_float(path)
+	require("Otree.oil").open_oil(path)
 end
 
 function M.edit_into_dir()
@@ -322,7 +325,7 @@ function M.edit_into_dir()
 			return
 		end
 	end
-	require("Otree.float").open_float(path)
+	require("Otree.oil").open_oil(path)
 end
 
 function M.toggle_hidden()

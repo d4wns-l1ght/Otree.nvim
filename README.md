@@ -113,6 +113,7 @@ require("Otree").setup({
         height_ratio = 0.7,
         padding = 2,
         cursorline = true,
+		border = "rounded",
     },
 })
 ```
@@ -140,7 +141,7 @@ require("Otree").setup({
 | `.`         | Toggle hidden files visibility          |
 | `i`         | Toggle ignored files visibility         |
 | `r`         | Refresh tree view                       |
-| `f`         | Focus on currently open file            |
+| `f`         | Focus the previous buffer               |
 
 ---
 

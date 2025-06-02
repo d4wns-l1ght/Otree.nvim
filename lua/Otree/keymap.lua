@@ -80,21 +80,6 @@ local function handle_window_enter()
 	end
 end
 
-local function create_buffer_enter_autocmd(augroup)
-	vim.api.nvim_create_autocmd("BufEnter", {
-		group = augroup,
-		callback = handle_buffer_redirection,
-	})
-end
-
-local function create_window_enter_autocmds(augroup, buf)
-	vim.api.nvim_create_autocmd({ "BufWinEnter", "WinEnter" }, {
-		group = augroup,
-		buffer = buf,
-		callback = handle_window_enter,
-	})
-end
-
 function M.setup_keymaps(buf)
 	local actions = require("Otree.actions")
 
@@ -107,14 +92,24 @@ function M.setup_keymaps(buf)
 		if action_func then
 			vim.keymap.set("n", key, action_func, { buffer = buf, nowait = true })
 		else
-			vim.notify("Otree: Unknown action '" .. action_str .. "' for key '" .. key .. "'", vim.log.levels.WARN)
+			vim.notify("Otree: unknown action '" .. action_str .. "' for key '" .. key .. "'", vim.log.levels.WARN)
 		end
 	end
 end
 
 function M.setup_buffer_autocmds(buf)
-	create_buffer_enter_autocmd(state.augroup)
-	create_window_enter_autocmds(state.augroup, buf)
+	local augroup = state.augroup
+
+	vim.api.nvim_create_autocmd("BufEnter", {
+		group = augroup,
+		callback = handle_buffer_redirection,
+	})
+
+	vim.api.nvim_create_autocmd({ "BufWinEnter", "WinEnter" }, {
+		group = augroup,
+		buffer = buf,
+		callback = handle_window_enter,
+	})
 end
 
 return M

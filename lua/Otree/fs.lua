@@ -95,7 +95,7 @@ function M.scan_dir(dir)
 	table.insert(cmd, dir)
 	local paths = vim.system(cmd, { cwd = dir, text = true }):wait()
 	if paths.code ~= 0 then
-		vim.notify("Otree: fd failed to run in " .. dir, vim.log.levels.ERROR)
+		vim.notify("Otree: failed to run fd in directory: " .. dir, vim.log.levels.ERROR)
 		return {}
 	end
 	paths = vim.split(paths.stdout or "", "\n", { trimempty = true })

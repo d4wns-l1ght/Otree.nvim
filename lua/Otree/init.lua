@@ -65,6 +65,7 @@ local default_config = {
 		height_ratio = 0.7,
 		padding = 2,
 		cursorline = true,
+		border = "rounded",
 	},
 }
 
