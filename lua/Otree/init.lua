@@ -9,8 +9,10 @@ local default_config = {
 	hijack_netrw = true,
 	show_hidden = false,
 	show_ignore = false,
-	ignore_patterns = {},
 	cursorline = true,
+
+	ignore_patterns = {},
+
 	keymaps = {
 		["<CR>"] = "actions.on_enter",
 		["l"] = "actions.on_enter",
@@ -18,8 +20,8 @@ local default_config = {
 		["q"] = "actions.close_win",
 		["<C-h>"] = "actions.goto_parent",
 		["<C-l>"] = "actions.goto_dir",
-		["<M-h>"] = "actions.goto_pwd",
-		["cd"] = "actions.change_pwd",
+		["<M-h>"] = "actions.goto_home_dir",
+		["cd"] = "actions.change_home_dir",
 		["L"] = "actions.open_dirs",
 		["H"] = "actions.close_dirs",
 		["o"] = "actions.edit_dir",
@@ -27,11 +29,12 @@ local default_config = {
 		["t"] = "actions.open_tab",
 		["v"] = "actions.open_vsplit",
 		["s"] = "actions.open_split",
-		["r"] = "actions.refresh",
-		["f"] = "actions.focus_file",
 		["."] = "actions.toggle_hidden",
 		["i"] = "actions.toggle_ignore",
+		["r"] = "actions.refresh",
+		["f"] = "actions.focus_file",
 	},
+
 	tree = {
 		space_after_icon = " ",
 		space_after_connector = " ",
@@ -40,11 +43,13 @@ local default_config = {
 		connector_middle = "├─",
 		vertical_line = "│",
 	},
+
 	icons = {
 		title = " ",
 		directory = "",
 		empty_dir = "",
 	},
+
 	highlights = {
 		directory = "Directory",
 		file = "Normal",
@@ -54,6 +59,7 @@ local default_config = {
 		float_normal = "TelescopeNormal",
 		float_border = "TelescopeBorder",
 	},
+
 	float = {
 		width_ratio = 0.4,
 		height_ratio = 0.7,
@@ -70,10 +76,10 @@ local function hijack_netrw(opts)
 		nested = true,
 		callback = function()
 			local args = vim.fn.argv()
-			local pwd = vim.fn.getcwd()
+			local cwd = vim.fn.getcwd()
 			if #args == 0 then
 				if opts.open_on_startup then
-					actions.open_win(pwd)
+					actions.open_win(cwd)
 				end
 				return
 			end
@@ -93,29 +99,32 @@ local function hijack_netrw(opts)
 				vim.cmd("enew")
 			end
 			if path == "." then
-				actions.open_win(pwd)
+				actions.open_win(cwd)
 			elseif path == ".." then
-				actions.open_win(pwd:match("^(.+)/[^/]+$"))
+				actions.open_win(cwd:match("^(.+)/[^/]+$"))
 			elseif path then
-				actions.open_win(pwd .. "/" .. path)
+				actions.open_win(cwd .. "/" .. path)
 			end
 		end,
 	})
 end
 
-local function setup_oil(oil)
-	oil.setup({
+local function setup_oil()
+	require("oil").setup({
 		use_default_keymaps = false,
 		skip_confirm_for_simple_edits = true,
 		delete_to_trash = true,
 		cleanup_delay_ms = false,
 		default_file_explorer = false,
 		keymaps = {
-			["st"] = { "actions.toggle_trash", mode = "n" },
+			["t"] = { "actions.toggle_trash", mode = "n" },
+			["."] = { "actions.toggle_hidden", mode = "n" },
 		},
+
 		view_options = {
 			show_hidden = state.show_hidden,
 		},
+
 		confirmation = {
 			max_width = 0.9,
 			min_width = { 30 },
@@ -123,46 +132,7 @@ local function setup_oil(oil)
 	})
 end
 
-function M.setup(opts)
-	opts = opts or {}
-
-	local ok_devicons, _ = pcall(require, "nvim-web-devicons")
-	if not ok_devicons then
-		vim.notify(
-			"Otree: nvim-web-devicons is required but not installed",
-			vim.log.levels.ERROR
-		)
-		return
-	end
-
-	local ok_oil, oil = pcall(require, "oil")
-	if not ok_oil then
-		vim.notify(
-			"Otree: oil.nvim is required but not installed",
-			vim.log.levels.ERROR
-		)
-		return
-	end
-
-	state.fd = vim.fn.executable("fd") == 1 and "fd"
-		or (vim.fn.executable("fdfind") == 1 and "fdfind")
-	if not state.fd then
-		vim.notify(
-			"Otree : neither 'fd' nor 'fdfind' is installed!",
-			vim.log.levels.ERROR
-		)
-		return
-	end
-
-	local user_keymaps = opts.keymaps
-	local disable_default_km = (opts.use_default_keymaps == false)
-
-	opts = vim.tbl_deep_extend("force", default_config, opts)
-
-	if disable_default_km then
-		opts.keymaps = user_keymaps or {}
-	end
-
+local function setup_state(opts)
 	local config_keys = {
 		"show_hidden",
 		"show_ignore",
@@ -175,18 +145,54 @@ function M.setup(opts)
 		"icons",
 		"float",
 	}
-
 	for _, key in ipairs(config_keys) do
 		state[key] = opts[key]
+	end
+end
+
+local function check_dependencies()
+	local ok_devicons, _ = pcall(require, "nvim-web-devicons")
+	if not ok_devicons then
+		vim.notify("Otree: nvim-web-devicons is required but not installed", vim.log.levels.ERROR)
+		return false
+	end
+
+	local ok_oil, _ = pcall(require, "oil")
+	if not ok_oil then
+		vim.notify("Otree: oil.nvim is required but not installed", vim.log.levels.ERROR)
+		return false
+	end
+
+	state.fd = vim.fn.executable("fd") == 1 and "fd" or (vim.fn.executable("fdfind") == 1 and "fdfind")
+	if not state.fd then
+		vim.notify("Otree: neither 'fd' nor 'fdfind' is installed", vim.log.levels.ERROR)
+		return false
+	end
+
+	return true
+end
+
+function M.setup(opts)
+	if check_dependencies() ~= true then
+		return
+	end
+
+	opts = opts or {}
+	local user_keymaps = opts.keymaps
+	local disable_default_km = (opts.use_default_keymaps == false)
+	opts = vim.tbl_deep_extend("force", default_config, opts)
+	if disable_default_km then
+		opts.keymaps = user_keymaps or {}
+	end
+
+	setup_state(opts)
+	setup_oil()
+	if opts.hijack_netrw then
+		hijack_netrw(opts)
 	end
 
 	vim.api.nvim_create_user_command("Otree", actions.toggle_tree, {})
 	vim.api.nvim_create_user_command("OtreeFocus", actions.focus_tree, {})
-
-	setup_oil(oil)
-	if opts.hijack_netrw then
-		hijack_netrw(opts)
-	end
 
 	return M
 end
