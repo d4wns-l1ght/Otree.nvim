@@ -19,8 +19,18 @@ local function handle_buffer_redirection(args)
 		return
 	end
 
-	local target_win = vim.fn.win_getid(vim.fn.winnr("l"))
-	if not vim.api.nvim_win_is_valid(target_win) then
+	local target_win = nil
+	for _, win in ipairs(vim.api.nvim_list_wins()) do
+		local config = vim.api.nvim_win_get_config(win)
+		if config.relative == "" and win ~= state.win then
+			target_win = win
+			break
+		end
+	end
+
+	if not target_win then
+		vim.api.nvim_win_set_buf(state.win, args.buf)
+		state.win = nil
 		return
 	end
 
@@ -97,7 +107,7 @@ function M.setup_keymaps(buf)
 	end
 end
 
-function M.setup_buffer_autocmds(buf)
+function M.setup_autocmds(buf)
 	local augroup = state.augroup
 
 	vim.api.nvim_create_autocmd("BufEnter", {

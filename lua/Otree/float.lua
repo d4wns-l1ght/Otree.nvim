@@ -15,8 +15,12 @@ local function calculate_window_geometry(config)
 	local height = vim.o.lines
 	local outer_width = math.floor(width * config.width_ratio)
 	local outer_height = math.floor(height * config.height_ratio)
-	local col = math.floor((width - outer_width) / 2)
-	local row = math.floor((height - outer_height) / 2)
+	local col = state.win_size + 1
+	local row = 0
+	if config.center then
+		col = math.floor((width - outer_width) / 2)
+		row = math.floor((height - outer_height) / 2)
+	end
 
 	return {
 		outer_width = outer_width,
@@ -26,6 +30,7 @@ local function calculate_window_geometry(config)
 		col = col,
 		row = row,
 		padding = config.padding,
+		border = config.border,
 	}
 end
 
@@ -39,9 +44,10 @@ local function create_outer_window(geometry)
 		col = geometry.col,
 		row = geometry.row,
 		style = "minimal",
-		border = state.float.border,
+		border = geometry.border,
 		noautocmd = true,
 		focusable = false,
+		zindex = 1,
 	})
 
 	local winhl =
@@ -59,13 +65,88 @@ local function create_inner_window(geometry)
 		height = geometry.inner_height,
 		col = geometry.padding,
 		row = geometry.padding,
-		style = "minimal",
 		border = "none",
 		noautocmd = true,
 	})
 end
 
+local function handle_buffer_leave()
+	vim.schedule(function()
+		local curr = vim.api.nvim_get_current_buf()
+		local curr_filetype = vim.bo[curr].filetype
+		if curr_filetype == "" or curr_filetype == "oil_preview" or curr_filetype == "oil" then
+			local win_config = vim.api.nvim_win_get_config(0)
+			local is_floating = win_config.relative ~= ""
+
+			if is_floating then
+				return
+			end
+		end
+
+		M.close_float()
+		require("Otree.actions").refresh()
+	end)
+end
+
+local function handle_buffer_enter(args)
+	if args.file:match("^oil://") then
+		require("Otree.oil").set_title(args.file:gsub("^oil://", ""), state.icons.title)
+		return
+	end
+	if args.file:match("^oil%-trash://") then
+		require("Otree.oil").set_title(args.file:gsub("^oil%-trash://", ""), state.icons.trash)
+		return
+	end
+	if args.file:match("^" .. state.buf_prefix) or args.file == "" then
+		return
+	end
+	M.close_float()
+	require("Otree.actions").refresh()
+
+	local target_win = nil
+	for _, win in ipairs(vim.api.nvim_list_wins()) do
+		local config = vim.api.nvim_win_get_config(win)
+		if config.relative == "" and win ~= state.win then
+			target_win = win
+			break
+		end
+	end
+
+	if not target_win then
+		vim.api.nvim_win_set_buf(state.win, args.buf)
+		state.win = nil
+		return
+	end
+	vim.api.nvim_set_current_win(target_win)
+	vim.cmd("drop " .. args.file)
+end
+
+local function setup_keymaps()
+	local close_keys = { "q", "<Esc>" }
+	for _, key in ipairs(close_keys) do
+		vim.keymap.set("n", key, function()
+			M.close_float()
+		end, {
+			noremap = true,
+		})
+	end
+end
+
+local function setup_autocmds()
+	local augroup = vim.api.nvim_create_augroup("OtreeFloat", { clear = true })
+
+	vim.api.nvim_create_autocmd("WinLeave", {
+		group = augroup,
+		callback = handle_buffer_leave,
+	})
+	vim.api.nvim_create_autocmd("BufWinEnter", {
+		group = augroup,
+		callback = handle_buffer_enter,
+	})
+end
+
 function M.close_float()
+	vim.api.nvim_clear_autocmds({ group = "OtreeFloat" })
 	close_window_if_valid(M.inner_win_id)
 	close_window_if_valid(M.outer_win_id)
 	M.inner_win_id = nil
@@ -80,7 +161,13 @@ function M.open_float(config)
 	if not vim.api.nvim_win_is_valid(M.inner_win_id) then
 		return false
 	end
+	if not vim.api.nvim_win_is_valid(M.outer_win_id) then
+		return false
+	end
+	vim.api.nvim_win_set_option(M.inner_win_id, "cursorline", config.cursorline)
 	vim.api.nvim_set_current_win(M.inner_win_id)
+	setup_keymaps()
+	setup_autocmds()
 	return true
 end
 

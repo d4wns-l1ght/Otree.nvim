@@ -13,6 +13,7 @@
 - **Toggle visibility** for hidden and ignored files
 - **Floating window support** with adjustable dimensions
 - **Simple API and commands** for ease of use
+- **Built-in help system** with keymap documentation
 
 ---
 
@@ -62,14 +63,14 @@ require("Otree").setup({
     ignore_patterns = {},
 
     keymaps = {
-        ["<CR>"] = "actions.on_enter",
-        ["l"] = "actions.on_enter",
-        ["h"] = "actions.on_close_dir",
+        ["<CR>"] = "actions.select",
+        ["l"] = "actions.select",
+        ["h"] = "actions.close_dir",
         ["q"] = "actions.close_win",
         ["<C-h>"] = "actions.goto_parent",
         ["<C-l>"] = "actions.goto_dir",
-        ["<M-h>"] = "actions.goto_pwd",
-        ["cd"] = "actions.change_pwd",
+        ["<M-h>"] = "actions.goto_home_dir",
+        ["cd"] = "actions.change_home_dir",
         ["L"] = "actions.open_dirs",
         ["H"] = "actions.close_dirs",
         ["o"] = "actions.edit_dir",
@@ -81,6 +82,7 @@ require("Otree").setup({
         ["i"] = "actions.toggle_ignore",
         ["r"] = "actions.refresh",
         ["f"] = "actions.focus_file",
+        ["?"] = "actions.open_help",
     },
 
     tree = {
@@ -96,6 +98,8 @@ require("Otree").setup({
         title = " ",
         directory = "",
         empty_dir = "",
+        trash = "🗑️",
+        keymap = "⌨ ",
     },
 
     highlights = {
@@ -109,11 +113,12 @@ require("Otree").setup({
     },
 
     float = {
+        center = true,
         width_ratio = 0.4,
         height_ratio = 0.7,
         padding = 2,
         cursorline = true,
-		border = "rounded",
+        border = "rounded",
     },
 })
 ```
@@ -124,7 +129,7 @@ require("Otree").setup({
 
 | Keybinding  | Action                                  |
 | ----------- | --------------------------------------- |
-| `<CR>`, `l` | Open file or expand folder              |
+| `<CR>`, `l` | Select file or open folder              |
 | `h`         | Close selected directory                |
 | `q`         | Close file tree window                  |
 | `<C-h>`     | Navigate to parent directory            |
@@ -142,6 +147,7 @@ require("Otree").setup({
 | `i`         | Toggle ignored files visibility         |
 | `r`         | Refresh tree view                       |
 | `f`         | Focus the previous buffer               |
+| `?`         | Show help with keybinding reference     |
 
 ---
 
@@ -156,42 +162,24 @@ require("Otree").setup({
 
 ## 🛠 Oil.nvim Integration
 
-**Otree** utilizes `oil.nvim` for file operations. When both plugins are installed, a compatible default configuration for `oil.nvim` is applied automatically:
+**Otree** integrates seamlessly with `oil.nvim` while preserving your existing Oil configuration. The integration works as follows:
+
+### Automatic Setup
+If you haven't already configured `oil.nvim`, Otree will automatically set it up with these recommended settings:
 
 ```lua
 require("oil").setup({
-    use_default_keymaps = false,
     skip_confirm_for_simple_edits = true,
     delete_to_trash = true,
     cleanup_delay_ms = false,
-    default_file_explorer = false,
-
-    keymaps = {
-        ["t"] = { "actions.toggle_trash", mode = "n" },
-        ["."] = { "actions.toggle_hidden", mode = "n" },
-    },
-
-    confirmation = {
-        max_width = 0.9,
-        min_width = { 30 },
-    },
 })
 ```
 
----
+### Preserving Your Configuration
+If `oil.nvim` is already configured (detected by the existence of the `:Oil` command), Otree will **not** override your settings. This ensures that your existing Oil workflow remains unchanged.
 
-## 🧰 Troubleshooting
+### Hidden Files Synchronization
+Otree automatically synchronizes the visibility of hidden files between the file tree and Oil buffers. When you toggle hidden files in Otree (using `.`), Oil will also show/hide hidden files accordingly.
 
-- **Missing icons?**
-  Ensure `nvim-web-devicons` is installed and properly configured.
-
-- **Tree doesn't open on startup?**
-  Set `open_on_startup = true` in your setup.
-
-- **Tree not showing for directories?**
-  Enable `hijack_netrw = true`.
-
-- **Command not found: `fd`?**
-  Install [`fd`](https://github.com/sharkdp/fd) or its Debian/Ubuntu alias `fdfind`, and ensure it's in your system `$PATH`.
-
----
+### ⚠️ Important Warning
+**Do not use `oil_preview` when Oil floating windows are open**, as this can cause conflicts and unexpected behavior. Close any Oil floating windows before using preview functionality.

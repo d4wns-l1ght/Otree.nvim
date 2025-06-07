@@ -41,11 +41,32 @@ local function open_dir(node)
 end
 
 local function open_file(mode, node)
-	local target_win = vim.fn.win_getid(vim.fn.winnr("#"))
-	if vim.api.nvim_win_is_valid(target_win) then
-		vim.api.nvim_set_current_win(target_win)
-		vim.cmd(mode .. " " .. node.full_path)
+	local target_win = nil
+
+	local prev_win = vim.fn.win_getid(vim.fn.winnr("#"))
+	if vim.api.nvim_win_is_valid(prev_win) and vim.api.nvim_win_get_config(prev_win).relative == "" then
+		target_win = prev_win
 	end
+
+	if not target_win then
+		for _, win in ipairs(vim.api.nvim_list_wins()) do
+			local config = vim.api.nvim_win_get_config(win)
+			if config.relative == "" then
+				target_win = win
+				break
+			end
+		end
+	end
+
+	if not target_win then
+		target_win = vim.api.nvim_get_current_win()
+	end
+
+	vim.api.nvim_set_current_win(target_win)
+
+	local escaped_path = vim.fn.fnameescape(node.full_path)
+
+	vim.cmd(string.format("%s %s", mode, escaped_path))
 end
 
 local function get_node()
@@ -67,14 +88,14 @@ end
 function M.close_dirs()
 	local node = get_node()
 	for _, item in ipairs(state.nodes) do
-		if node.parent_path == item.parent_path and item.type == "directory" and not item.is_close then
+		if node.parent_path == item.parent_path and item.type == "directory" and item.is_open then
 			close_dir(item)
 		end
 	end
 	ui.render()
 end
 
-function M.on_enter()
+function M.select()
 	local cursor = vim.api.nvim_win_get_cursor(state.win)
 	local line = cursor[1]
 	local node = state.nodes[line]
@@ -125,7 +146,7 @@ function M.open_vsplit()
 	end
 end
 
-function M.on_close_dir()
+function M.close_dir()
 	local cursor = vim.api.nvim_win_get_cursor(state.win)
 	local line = cursor[1]
 	local node = state.nodes[line]
@@ -141,11 +162,11 @@ function M.on_close_dir()
 	end
 
 	if node.level ~= 0 then
-		for _, item in ipairs(state.nodes) do
+		for i, item in ipairs(state.nodes) do
 			if item.full_path == node.parent_path and item.type == "directory" then
 				close_dir(item)
 				ui.render()
-				vim.api.nvim_win_set_cursor(state.win, { _, 0 })
+				vim.api.nvim_win_set_cursor(state.win, { i, 0 })
 				return
 			end
 		end
@@ -209,6 +230,10 @@ function M.focus_tree()
 	else
 		M.open_win()
 	end
+end
+
+function M.open_help()
+	require("Otree.help").open_help()
 end
 
 function M.open_win(path)
@@ -309,10 +334,22 @@ end
 function M.edit_dir()
 	local node = get_node()
 	local path = state.cwd
+	local node_index = nil
 	if node then
 		path = node.parent_path
+
+		local count = 0
+		for _, n in ipairs(state.nodes or {}) do
+			if n.parent_path == node.parent_path then
+				count = count + 1
+			end
+			if n.full_path == node.full_path then
+				node_index = count
+				break
+			end
+		end
 	end
-	require("Otree.oil").open_oil(path)
+	require("Otree.oil").open_oil(path, node_index)
 end
 
 function M.edit_into_dir()

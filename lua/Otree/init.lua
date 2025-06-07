@@ -14,9 +14,9 @@ local default_config = {
 	ignore_patterns = {},
 
 	keymaps = {
-		["<CR>"] = "actions.on_enter",
-		["l"] = "actions.on_enter",
-		["h"] = "actions.on_close_dir",
+		["<CR>"] = "actions.select",
+		["l"] = "actions.select",
+		["h"] = "actions.close_dir",
 		["q"] = "actions.close_win",
 		["<C-h>"] = "actions.goto_parent",
 		["<C-l>"] = "actions.goto_dir",
@@ -33,6 +33,7 @@ local default_config = {
 		["i"] = "actions.toggle_ignore",
 		["r"] = "actions.refresh",
 		["f"] = "actions.focus_file",
+		["?"] = "actions.open_help",
 	},
 
 	tree = {
@@ -48,6 +49,8 @@ local default_config = {
 		title = " ",
 		directory = "",
 		empty_dir = "",
+		trash = "🗑️",
+		keymap = "⌨ ",
 	},
 
 	highlights = {
@@ -61,6 +64,7 @@ local default_config = {
 	},
 
 	float = {
+		center = true,
 		width_ratio = 0.4,
 		height_ratio = 0.7,
 		padding = 2,
@@ -111,26 +115,14 @@ local function hijack_netrw(opts)
 end
 
 local function setup_oil()
-	require("oil").setup({
-		use_default_keymaps = false,
-		skip_confirm_for_simple_edits = true,
-		delete_to_trash = true,
-		cleanup_delay_ms = false,
-		default_file_explorer = false,
-		keymaps = {
-			["t"] = { "actions.toggle_trash", mode = "n" },
-			["."] = { "actions.toggle_hidden", mode = "n" },
-		},
-
-		view_options = {
-			show_hidden = state.show_hidden,
-		},
-
-		confirmation = {
-			max_width = 0.9,
-			min_width = { 30 },
-		},
-	})
+	if vim.fn.exists(":Oil") ~= 2 then
+		require("oil").setup({
+			skip_confirm_for_simple_edits = true,
+			delete_to_trash = true,
+			cleanup_delay_ms = false,
+		})
+	end
+	require("oil.config").view_options.show_hidden = state.show_hidden
 end
 
 local function setup_state(opts)
@@ -157,16 +149,15 @@ local function check_dependencies()
 		vim.notify("Otree: nvim-web-devicons is required but not installed", vim.log.levels.ERROR)
 		return false
 	end
+	state.fd = vim.fn.executable("fd") == 1 and "fd" or (vim.fn.executable("fdfind") == 1 and "fdfind")
+	if not state.fd then
+		vim.notify("Otree: neither 'fd' nor 'fdfind' is installed", vim.log.levels.ERROR)
+		return false
+	end
 
 	local ok_oil, _ = pcall(require, "oil")
 	if not ok_oil then
 		vim.notify("Otree: oil.nvim is required but not installed", vim.log.levels.ERROR)
-		return false
-	end
-
-	state.fd = vim.fn.executable("fd") == 1 and "fd" or (vim.fn.executable("fdfind") == 1 and "fdfind")
-	if not state.fd then
-		vim.notify("Otree: neither 'fd' nor 'fdfind' is installed", vim.log.levels.ERROR)
 		return false
 	end
 

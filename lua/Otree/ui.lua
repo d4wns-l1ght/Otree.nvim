@@ -1,5 +1,5 @@
 local state = require("Otree.state")
-local keymap = require("Otree.keymap")
+local keymap = require("Otree.ui_utils")
 local M = {}
 
 local function get_node_highlight(node)
@@ -107,7 +107,7 @@ end
 
 local function setup_buffer_behavior()
 	keymap.setup_keymaps(state.buf)
-	keymap.setup_buffer_autocmds(state.buf)
+	keymap.setup_autocmds(state.buf)
 end
 
 local function configure_window_options()
@@ -119,6 +119,7 @@ local function configure_window_options()
 		cursorline = state.cursorline,
 		winfixwidth = true,
 		winfixheight = true,
+		foldcolumn = "0",
 		winhl = "Search:None,CurSearch:None,IncSearch:None",
 	}
 
