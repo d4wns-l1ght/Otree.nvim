@@ -146,7 +146,9 @@ local function setup_autocmds()
 end
 
 function M.close_float()
-	vim.api.nvim_clear_autocmds({ group = "OtreeFloat" })
+	pcall(function()
+		vim.api.nvim_clear_autocmds({ group = "OtreeFloat" })
+	end)
 	close_window_if_valid(M.inner_win_id)
 	close_window_if_valid(M.outer_win_id)
 	M.inner_win_id = nil
