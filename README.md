@@ -59,6 +59,7 @@ require("Otree").setup({
     show_hidden = false,
     show_ignore = false,
     cursorline = true,
+    oil = "float",
 
     ignore_patterns = {},
 
@@ -88,19 +89,20 @@ require("Otree").setup({
     tree = {
         space_after_icon = " ",
         space_after_connector = " ",
-        connector_space = "  ",
-        connector_last = "└─",
-        connector_middle = "├─",
+        connector_space = " ",
+        connector_last = "└",
+        connector_middle = "├",
         vertical_line = "│",
     },
 
-    icons = {
-        title = " ",
-        directory = "",
-        empty_dir = "",
-        trash = "🗑️",
-        keymap = "⌨ ",
-    },
+	icons = {
+		title = " ",
+		directory = "",
+		empty_dir = "",
+		trash = " ",
+		keymap = "⌨ ",
+		oil = " ",
+	},
 
     highlights = {
         directory = "Directory",
@@ -160,12 +162,13 @@ require("Otree").setup({
 
 ---
 
-## 🛠 Oil.nvim Integration
+## ⚙️ Oil.nvim Integration
 
-**Otree** integrates seamlessly with `oil.nvim` while preserving your existing Oil configuration. The integration works as follows:
+**Otree** integrates seamlessly with [oil.nvim](https://github.com/stevearc/oil.nvim) for enhanced file management capabilities.
 
-### Automatic Setup
-If you haven't already configured `oil.nvim`, Otree will automatically set it up with these recommended settings:
+### Automatic Configuration
+
+If `oil.nvim` is not already configured, Otree will automatically set it up with these optimized defaults:
 
 ```lua
 require("oil").setup({
@@ -175,11 +178,27 @@ require("oil").setup({
 })
 ```
 
-### Preserving Your Configuration
-If `oil.nvim` is already configured (detected by the existence of the `:Oil` command), Otree will **not** override your settings. This ensures that your existing Oil workflow remains unchanged.
+If Oil is already configured, Otree respects your existing setup and will not override any settings.
+
+### Opening Modes
+
+You can configure how Oil opens using the `oil` option in your Otree setup:
+
+```lua
+require("otree").setup({
+  oil = "float"  -- Opens Oil in a floating window (default)
+  -- Any other value opens Oil directly inside the tree window
+})
+```
 
 ### Hidden Files Synchronization
-Otree automatically synchronizes the visibility of hidden files between the file tree and Oil buffers. When you toggle hidden files in Otree (using `.`), Oil will also show/hide hidden files accordingly.
 
-### ⚠️ Important Warning
-**Do not use `oil_preview` when Oil floating windows are open**, as this can cause conflicts and unexpected behavior. Close any Oil floating windows before using preview functionality.
+Toggling hidden files in Otree automatically syncs with Oil's `view_options.show_hidden` setting, ensuring consistent visibility across both interfaces.
+
+### Dynamic Titles
+
+Oil views display dynamically generated titles with icons and relative paths for better context and navigation.
+
+### ⚠️ Important Note
+
+**Do not use `oil_preview` when Oil is open in floating mode.** This may cause rendering or focus issues. Close floating Oil windows before using preview functionality.
