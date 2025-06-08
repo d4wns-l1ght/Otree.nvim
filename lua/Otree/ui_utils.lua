@@ -133,8 +133,8 @@ function M.setup_keymaps(buf)
 				require("Otree.float").close_float()
 			elseif state.oil ~= "float" and curr_win == state.win then
 				vim.api.nvim_win_set_buf(state.win, state.buf)
-				actions.refresh()
 			end
+			actions.refresh()
 		end, { noremap = true, silent = true })
 	end
 end
