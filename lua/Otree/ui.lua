@@ -131,7 +131,7 @@ function M.render()
 	local lines = {}
 	local highlights = {}
 	local nodes = state.nodes
-	local title = vim.fn.fnamemodify(state.cwd, ":t")
+	local title = state.icons.title .. vim.fn.fnamemodify(state.cwd, ":t")
 
 	render_basic_lines(nodes, lines, highlights)
 	set_buffer_content(lines, highlights)
