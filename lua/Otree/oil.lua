@@ -18,19 +18,25 @@ end
 
 function M.set_title(path, icon)
 	local formatted_path = format_path_for_title(path)
-	local title = icon .. " " .. formatted_path
-	float.set_title(title)
+	local title = icon .. formatted_path
+	if state.oil == "float" then
+		float.set_title(title)
+	else
+		require("Otree.ui").set_title(title)
+	end
 end
 
 function M.open_oil(path, index)
 	index = index or 1
-	if float.open_float() ~= true then
-		return
+	if state.oil == "float" then
+		if float.open_float() ~= true then
+			return
+		end
 	end
 	oil.open(path, {}, function()
 		vim.api.nvim_win_set_cursor(0, { index, 0 })
 	end)
-	M.set_title(path, state.icons.title)
+	M.set_title(path, state.icons.oil)
 end
 
 return M

@@ -90,7 +90,7 @@ end
 
 local function handle_buffer_enter(args)
 	if args.file:match("^oil://") then
-		require("Otree.oil").set_title(args.file:gsub("^oil://", ""), state.icons.title)
+		require("Otree.oil").set_title(args.file:gsub("^oil://", ""), state.icons.oil)
 		return
 	end
 	if args.file:match("^oil%-trash://") then
@@ -118,18 +118,7 @@ local function handle_buffer_enter(args)
 		return
 	end
 	vim.api.nvim_set_current_win(target_win)
-	vim.cmd("drop " .. args.file)
-end
-
-local function setup_keymaps()
-	local close_keys = { "q", "<Esc>" }
-	for _, key in ipairs(close_keys) do
-		vim.keymap.set("n", key, function()
-			M.close_float()
-		end, {
-			noremap = true,
-		})
-	end
+	vim.cmd("silent! drop " .. args.file)
 end
 
 local function setup_autocmds()
@@ -168,7 +157,6 @@ function M.open_float(config)
 	end
 	vim.api.nvim_win_set_option(M.inner_win_id, "cursorline", config.cursorline)
 	vim.api.nvim_set_current_win(M.inner_win_id)
-	setup_keymaps()
 	setup_autocmds()
 	return true
 end

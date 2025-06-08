@@ -10,6 +10,7 @@ local default_config = {
 	show_hidden = false,
 	show_ignore = false,
 	cursorline = true,
+	oil = "float",
 
 	ignore_patterns = {},
 
@@ -49,8 +50,9 @@ local default_config = {
 		title = " ",
 		directory = "",
 		empty_dir = "",
-		trash = "🗑️",
+		trash = " ",
 		keymap = "⌨ ",
+		oil = " ",
 	},
 
 	highlights = {
@@ -137,6 +139,7 @@ local function setup_state(opts)
 		"tree",
 		"icons",
 		"float",
+		"oil",
 	}
 	for _, key in ipairs(config_keys) do
 		state[key] = opts[key]

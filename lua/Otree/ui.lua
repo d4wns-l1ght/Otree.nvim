@@ -85,11 +85,6 @@ local function add_tree_structure(nodes)
 	end
 end
 
-local function set_window_title()
-	local cwd_name = vim.fn.fnamemodify(state.cwd, ":t")
-	vim.wo[state.win].winbar = "%#" .. state.highlights.title .. "#" .. state.icons.title .. cwd_name
-end
-
 local function configure_buffer_options()
 	local buf_opts = {
 		buftype = "nofile",
@@ -128,15 +123,20 @@ local function configure_window_options()
 	end
 end
 
+function M.set_title(title)
+	vim.wo[state.win].winbar = "%#" .. state.highlights.title .. "#" .. title
+end
+
 function M.render()
 	local lines = {}
 	local highlights = {}
 	local nodes = state.nodes
+	local title = vim.fn.fnamemodify(state.cwd, ":t")
 
 	render_basic_lines(nodes, lines, highlights)
 	set_buffer_content(lines, highlights)
 	add_tree_structure(nodes)
-	set_window_title()
+	M.set_title(title)
 	vim.api.nvim_buf_set_option(state.buf, "modifiable", false)
 end
 

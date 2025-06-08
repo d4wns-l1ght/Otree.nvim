@@ -19,6 +19,20 @@ local function handle_buffer_redirection(args)
 		return
 	end
 
+	if state.oil ~= "float" and args.file:match("^oil") then
+		vim.schedule(function()
+			if args.file:match("^oil://") then
+				require("Otree.oil").set_title(args.file:gsub("^oil://", ""), state.icons.oil)
+				return
+			end
+			if args.file:match("^oil%-trash://") then
+				require("Otree.oil").set_title(args.file:gsub("^oil%-trash://", ""), state.icons.trash)
+				return
+			end
+		end)
+		return
+	end
+
 	local target_win = nil
 	for _, win in ipairs(vim.api.nvim_list_wins()) do
 		local config = vim.api.nvim_win_get_config(win)
@@ -90,6 +104,10 @@ local function handle_window_enter()
 	end
 end
 
+local function is_float(win)
+	return vim.api.nvim_win_get_config(win).relative ~= ""
+end
+
 function M.setup_keymaps(buf)
 	local actions = require("Otree.actions")
 
@@ -105,6 +123,20 @@ function M.setup_keymaps(buf)
 			vim.notify("Otree: unknown action '" .. action_str .. "' for key '" .. key .. "'", vim.log.levels.WARN)
 		end
 	end
+
+	local close_keys = { "q", "<Esc>" }
+	for _, key in ipairs(close_keys) do
+		vim.keymap.set("n", key, function()
+			local curr_win = vim.api.nvim_get_current_win()
+
+			if is_float(curr_win) then
+				require("Otree.float").close_float()
+			elseif state.oil ~= "float" and curr_win == state.win then
+				vim.api.nvim_win_set_buf(state.win, state.buf)
+				actions.refresh()
+			end
+		end, { noremap = true, silent = true })
+	end
 end
 
 function M.setup_autocmds(buf)
@@ -119,6 +151,17 @@ function M.setup_autocmds(buf)
 		group = augroup,
 		buffer = buf,
 		callback = handle_window_enter,
+	})
+
+	vim.api.nvim_create_autocmd("WinResized", {
+		group = augroup,
+		callback = function()
+			if check_last_window() then
+				vim.schedule(function()
+					state.win = nil
+				end)
+			end
+		end,
 	})
 end
 

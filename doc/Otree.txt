@@ -1,0 +1,212 @@
+*Otree.txt*      A lightweight file tree explorer for Neovim      *Otree* *Otree.nvim*
+
+Author: Eutrius  
+License: MIT  
+Homepage: https://github.com/Eutrius/Otree.nvim
+
+==============================================================================  
+CONTENTS                                                  *Otree-contents*
+
+1. Introduction            |Otree-introduction|  
+2. Requirements            |Otree-requirements|  
+3. Installation            |Otree-installation|  
+4. Configuration           |Otree-configuration|  
+5. Commands                |Otree-commands|  
+6. Keybindings             |Otree-keybindings|  
+7. API                     |Otree-api|  
+8. Oil Integration         |Otree-oil-integration|
+
+==============================================================================  
+1. INTRODUCTION                                           *Otree-introduction*
+
+Otree.nvim is a lightweight and customizable file tree explorer for Neovim,  
+built for speed, simplicity, and seamless user experience. It integrates  
+tightly with oil.nvim and nvim-web-devicons to provide an elegant and  
+efficient file navigation workflow.
+
+Features:~  
+• Fast and responsive file tree using `fd` or `fdfind`  
+• Tight integration with oil.nvim for file operations  
+• Floating window support with adjustable dimensions
+
+==============================================================================  
+2. REQUIREMENTS                                           *Otree-requirements*
+
+• Neovim 0.8+  
+• fd or fdfind (file finder utility)  
+• nvim-web-devicons (for file icons)  
+• oil.nvim (for file operations)
+
+==============================================================================  
+3. INSTALLATION                                           *Otree-installation*
+
+Using lazy.nvim:~  
+>  
+return {  
+    "Eutrius/Otree.nvim",  
+    lazy = false,  
+    dependencies = {  
+        "nvim-tree/nvim-web-devicons",  
+        "stevearc/oil.nvim",  
+    },  
+    config = function()  
+        require("Otree").setup()  
+    end  
+}  
+<
+
+==============================================================================  
+4. CONFIGURATION                                          *Otree-configuration*
+
+Call the setup function with your configuration:~  
+>  
+require("Otree").setup({  
+    -- Your configuration here  
+})  
+<
+
+Default Configuration:~  
+>  
+{  
+    win_size = 30,               -- Width of the file tree window  
+    open_on_startup = false,     -- Automatically open tree when Neovim starts  
+    use_default_keymaps = true,  -- Load default key mappings  
+    hijack_netrw = true,         -- Disable netrw and use Otree instead  
+    show_hidden = false,         -- Show hidden files (dotfiles) by default  
+    show_ignore = false,         -- Show files ignored by .gitignore or fd rules  
+    cursorline = true,           -- Highlight the current line in the tree  
+    oil = "float",               -- "float" opens Oil in a floating window; any other value opens it in the tree  
+    ignore_patterns = {},        -- List of glob patterns to hide files/folders  
+    keymaps = {                  -- See |Otree-keybindings|  
+        ["<CR>"] = "actions.select",  
+        ["l"] = "actions.select",  
+        ["h"] = "actions.close_dir",  
+        ["q"] = "actions.close_win",  
+        ["<C-h>"] = "actions.goto_parent",  
+        ["<C-l>"] = "actions.goto_dir",  
+        ["<M-h>"] = "actions.goto_home_dir",  
+        ["cd"] = "actions.change_home_dir",  
+        ["L"] = "actions.open_dirs",  
+        ["H"] = "actions.close_dirs",  
+        ["o"] = "actions.edit_dir",  
+        ["O"] = "actions.edit_into_dir",  
+        ["t"] = "actions.open_tab",  
+        ["v"] = "actions.open_vsplit",  
+        ["s"] = "actions.open_split",  
+        ["."] = "actions.toggle_hidden",  
+        ["i"] = "actions.toggle_ignore",  
+        ["r"] = "actions.refresh",  
+        ["f"] = "actions.focus_file",  
+        ["?"] = "actions.open_help",  
+    },  
+    tree = {  
+        space_after_icon = " ",  
+        space_after_connector = " ",  
+        connector_space = "  ",  
+        connector_last = "└─",  
+        connector_middle = "├─",  
+        vertical_line = "│",  
+    },  
+    icons = {  
+        title = " ",  
+        directory = "",  
+        empty_dir = "",  
+        trash = " ",  
+        keymap = "⌨ ",  
+        oil = " ",  
+    },  
+    highlights = {  
+        directory = "Directory",  
+        file = "Normal",  
+        title = "TelescopeTitle",  
+        tree = "Comment",  
+        normal = "Normal",  
+        float_normal = "TelescopeNormal",  
+        float_border = "TelescopeBorder",  
+    },  
+    float = {  
+        center = true,  
+        width_ratio = 0.4,  
+        height_ratio = 0.7,  
+        padding = 2,  
+        cursorline = true,  
+        border = "rounded",  
+    },  
+}  
+<
+
+==============================================================================  
+5. COMMANDS                                               *Otree-commands*
+
+:Otree                      *:Otree*  
+    Toggle the file tree window. Opens if closed, closes if open.
+
+:OtreeFocus                 *:OtreeFocus*  
+    Focus the file tree window. Opens if not already open.
+
+==============================================================================  
+6. KEYBINDINGS                                            *Otree-keybindings*
+
+Default keybindings in the tree window:~  
+
+<CR>, l        Select file or open/close folder  
+h              Close selected directory or go to parent  
+q              Close file tree window  
+<C-h>          Navigate to parent directory  
+<C-l>          Enter selected directory  
+<M-h>          Go to home directory  
+cd             Change home directory to current  
+L              Open all directories at the same level  
+H              Close all directories at the same level  
+o              Open parent directory in Oil  
+O              Open selected directory in Oil  
+t              Open file in new tab  
+v              Open file in vertical split  
+s              Open file in horizontal split  
+.              Toggle hidden files visibility  
+i              Toggle ignored files visibility  
+r              Refresh tree view  
+f              Focus the previous buffer in tree  
+?              Show help with keybinding reference
+
+==============================================================================  
+7. API                                                    *Otree-api*
+
+*Otree.setup()*  
+setup({config})  
+    Initialize Otree with the given configuration.  
+
+Parameters:~  
+    {config} (table|nil) Configuration table  
+
+Returns:~  
+    Module table with setup and toggle functions
+
+==============================================================================  
+8. OIL INTEGRATION                                       *Otree-oil-integration*
+
+Otree integrates with |oil.nvim| for enhanced file management.
+
+If |oil.nvim| is not configured, Otree sets it up automatically with:~  
+    - skip_confirm_for_simple_edits = true  
+    - delete_to_trash = true  
+    - cleanup_delay_ms = false
+
+If Oil is already configured, Otree respects your existing setup and does  
+not override it.
+
+You can configure how Oil opens using the `oil` option in Otree setup:~  
+    • `oil = "float"` — opens Oil in a floating window  
+    • Any other value — opens Oil directly inside the tree window
+
+Note:~  
+⚠ Do not use `oil_preview` when Oil is open in floating mode.  
+This may cause rendering or focus issues.
+
+Toggling hidden files in Otree syncs with Oil's setting:~  
+    oil.config.view_options.show_hidden
+
+Titles for Oil views are dynamically set with icons and relative paths.
+
+==============================================================================  
+vim:tw=78:ts=8:ft=help:norl:
