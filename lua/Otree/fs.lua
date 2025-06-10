@@ -102,7 +102,7 @@ function M.scan_dir(dir)
 	local nodes = {}
 	for _, path in ipairs(paths) do
 		if path ~= dir then
-			path = path:gsub("/$", "")
+			path = vim.fs.normalize(path)
 			local stat = cached_stat(path)
 			if stat then
 				local node = make_node(path, dir, stat.type)
