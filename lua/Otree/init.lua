@@ -119,6 +119,7 @@ end
 local function setup_oil()
 	if vim.fn.exists(":Oil") ~= 2 then
 		require("oil").setup({
+			default_file_explorer = false,
 			skip_confirm_for_simple_edits = true,
 			delete_to_trash = true,
 			cleanup_delay_ms = false,
