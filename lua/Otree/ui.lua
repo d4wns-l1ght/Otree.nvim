@@ -56,7 +56,7 @@ local function create_tree_chunks(node, node_index, nodes)
 	if icon then
 		table.insert(chunks, {
 			icon .. state.tree.space_after_icon,
-			node.icon_hl or state.highlights.normal,
+			node.icon_hl or "Normal",
 		})
 	end
 

@@ -331,7 +331,7 @@ function M.goto_dir()
 	M.refresh()
 end
 
-function M.edit_dir()
+function M.oil_dir()
 	local node = get_node()
 	local path = state.cwd
 	local node_index = nil
@@ -352,7 +352,7 @@ function M.edit_dir()
 	require("Otree.oil").open_oil(path, node_index)
 end
 
-function M.edit_into_dir()
+function M.oil_into_dir()
 	local node = get_node()
 	local path = state.cwd
 	if node then

@@ -46,7 +46,6 @@ return {
     "Eutrius/Otree.nvim",  
     lazy = false,  
     dependencies = {  
-        "nvim-tree/nvim-web-devicons",  
         "stevearc/oil.nvim",  
     },  
     config = function()  
@@ -88,8 +87,8 @@ Default Configuration:~
         ["cd"] = "actions.change_home_dir",  
         ["L"] = "actions.open_dirs",  
         ["H"] = "actions.close_dirs",  
-        ["o"] = "actions.edit_dir",  
-        ["O"] = "actions.edit_into_dir",  
+        ["o"] = "actions.oil_dir",  
+        ["O"] = "actions.oil_into_dir",  
         ["t"] = "actions.open_tab",  
         ["v"] = "actions.open_vsplit",  
         ["s"] = "actions.open_split",  
@@ -109,7 +108,8 @@ Default Configuration:~
     },  
     icons = {  
         title = " ",  
-        directory = "",  
+	default_file = "",
+        default_directory = "",  
         empty_dir = "",  
         trash = " ",  
         keymap = "⌨ ",  
@@ -120,7 +120,6 @@ Default Configuration:~
         file = "Normal",  
         title = "TelescopeTitle",  
         tree = "Comment",  
-        normal = "Normal",  
         float_normal = "TelescopeNormal",  
         float_border = "TelescopeBorder",  
     },  
@@ -188,6 +187,7 @@ Returns:~
 Otree integrates with |oil.nvim| for enhanced file management.
 
 If |oil.nvim| is not configured, Otree sets it up automatically with:~  
+    - default_file_explorer = false
     - skip_confirm_for_simple_edits = true  
     - delete_to_trash = true  
     - cleanup_delay_ms = false

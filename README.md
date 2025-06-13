@@ -74,8 +74,8 @@ require("Otree").setup({
         ["cd"] = "actions.change_home_dir",
         ["L"] = "actions.open_dirs",
         ["H"] = "actions.close_dirs",
-        ["o"] = "actions.edit_dir",
-        ["O"] = "actions.edit_into_dir",
+        ["o"] = "actions.oil_dir",
+        ["O"] = "actions.oil_into_dir",
         ["t"] = "actions.open_tab",
         ["v"] = "actions.open_vsplit",
         ["s"] = "actions.open_split",
@@ -97,7 +97,8 @@ require("Otree").setup({
 
 	icons = {
 		title = " ",
-		directory = "",
+		default_file = "",
+		default_directory = "",
 		empty_dir = "",
 		trash = " ",
 		keymap = "⌨ ",
@@ -109,7 +110,6 @@ require("Otree").setup({
         file = "Normal",
         title = "TelescopeTitle",
         tree = "Comment",
-        normal = "Normal",
         float_normal = "TelescopeNormal",
         float_border = "TelescopeBorder",
     },
@@ -172,6 +172,7 @@ If `oil.nvim` is not already configured, Otree will automatically set it up with
 
 ```lua
 require("oil").setup({
+    default_file_explorer = false,
     skip_confirm_for_simple_edits = true,
     delete_to_trash = true,
     cleanup_delay_ms = false,

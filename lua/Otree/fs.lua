@@ -1,5 +1,6 @@
 local state = require("Otree.state")
-local devicons = require("nvim-web-devicons")
+local has_mini_icons, mini_icons = pcall(require, "mini.icons")
+local has_dev_icons, devicons = pcall(require, "nvim-web-devicons")
 local M = {}
 
 local uv = vim.uv or vim.loop
@@ -28,18 +29,20 @@ local function cached_stat(path)
 end
 
 local function get_icon(type, fullpath, filename)
-	local icon, icon_hl
-	if type == "directory" then
-		if is_dir_empty(fullpath) then
-			icon = state.icons.empty_dir
-		else
-			icon = state.icons.directory
-		end
-		icon_hl = state.highlights.directory
-	else
-		icon, icon_hl = devicons.get_icon(filename, nil, { default = true })
+	if has_mini_icons then
+		return mini_icons.get(type == "directory" and "directory" or "file", filename)
 	end
-	return icon, icon_hl
+
+	if type == "directory" then
+		local icon = is_dir_empty(fullpath) and state.icons.empty_dir or state.icons.default_directory
+		return icon, state.highlights.directory
+	end
+
+	if has_dev_icons then
+		return devicons.get_icon(filename, nil, { default = true })
+	end
+
+	return state.icons.default_file, state.highlights.file
 end
 
 local function make_node(full_path, base, type)

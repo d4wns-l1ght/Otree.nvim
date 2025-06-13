@@ -25,8 +25,8 @@ local default_config = {
 		["cd"] = "actions.change_home_dir",
 		["L"] = "actions.open_dirs",
 		["H"] = "actions.close_dirs",
-		["o"] = "actions.edit_dir",
-		["O"] = "actions.edit_into_dir",
+		["o"] = "actions.oil_dir",
+		["O"] = "actions.oil_into_dir",
 		["t"] = "actions.open_tab",
 		["v"] = "actions.open_vsplit",
 		["s"] = "actions.open_split",
@@ -48,7 +48,8 @@ local default_config = {
 
 	icons = {
 		title = " ",
-		directory = "",
+		default_file = "",
+		default_directory = "",
 		empty_dir = "",
 		trash = " ",
 		keymap = "⌨ ",
@@ -58,9 +59,8 @@ local default_config = {
 	highlights = {
 		directory = "Directory",
 		file = "Normal",
-		title = "TelescopeTitle",
 		tree = "Comment",
-		normal = "Normal",
+		title = "TelescopeTitle",
 		float_normal = "TelescopeNormal",
 		float_border = "TelescopeBorder",
 	},
@@ -148,11 +148,6 @@ local function setup_state(opts)
 end
 
 local function check_dependencies()
-	local ok_devicons, _ = pcall(require, "nvim-web-devicons")
-	if not ok_devicons then
-		vim.notify("Otree: nvim-web-devicons is required but not installed", vim.log.levels.ERROR)
-		return false
-	end
 	state.fd = vim.fn.executable("fd") == 1 and "fd" or (vim.fn.executable("fdfind") == 1 and "fdfind")
 	if not state.fd then
 		vim.notify("Otree: neither 'fd' nor 'fdfind' is installed", vim.log.levels.ERROR)
@@ -164,7 +159,6 @@ local function check_dependencies()
 		vim.notify("Otree: oil.nvim is required but not installed", vim.log.levels.ERROR)
 		return false
 	end
-
 	return true
 end
 
