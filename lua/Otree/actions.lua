@@ -69,16 +69,41 @@ local function open_file(mode, node)
 	vim.cmd(string.format("%s %s", mode, escaped_path))
 end
 
+local function can_access_dir(node)
+	if not vim.uv.fs_scandir(node.full_path) then
+		vim.notify("Otree: " .. node.filename .. " is not accessible", vim.log.levels.WARN)
+		return false
+	end
+	return true
+end
+
 local function get_node()
 	local cursor = vim.api.nvim_win_get_cursor(state.win)
 	local line = cursor[1]
-	return state.nodes[line]
+	local node = state.nodes[line]
+	if not node then
+		return nil
+	end
+
+	if node.type == "directory" and not can_access_dir(node) then
+		return nil
+	end
+
+	return node
 end
 
 function M.open_dirs()
 	local node = get_node()
+	if not node then
+		return
+	end
 	for _, item in ipairs(state.nodes) do
-		if node.parent_path == item.parent_path and item.type == "directory" and not item.is_open then
+		if
+			node.parent_path == item.parent_path
+			and item.type == "directory"
+			and not item.is_open
+			and can_access_dir(item)
+		then
 			open_dir(item)
 		end
 	end
@@ -87,6 +112,9 @@ end
 
 function M.close_dirs()
 	local node = get_node()
+	if not node then
+		return
+	end
 	for _, item in ipairs(state.nodes) do
 		if node.parent_path == item.parent_path and item.type == "directory" and item.is_open then
 			close_dir(item)
@@ -98,7 +126,7 @@ end
 function M.select()
 	local cursor = vim.api.nvim_win_get_cursor(state.win)
 	local line = cursor[1]
-	local node = state.nodes[line]
+	local node = get_node()
 	if not node then
 		return
 	end
@@ -149,7 +177,7 @@ end
 function M.close_dir()
 	local cursor = vim.api.nvim_win_get_cursor(state.win)
 	local line = cursor[1]
-	local node = state.nodes[line]
+	local node = get_node()
 	if not node then
 		return
 	end
@@ -348,8 +376,8 @@ function M.oil_dir()
 				break
 			end
 		end
+		require("Otree.oil").open_oil(path, node_index)
 	end
-	require("Otree.oil").open_oil(path, node_index)
 end
 
 function M.oil_into_dir()
@@ -361,8 +389,8 @@ function M.oil_into_dir()
 		else
 			return
 		end
+		require("Otree.oil").open_oil(path)
 	end
-	require("Otree.oil").open_oil(path)
 end
 
 function M.toggle_hidden()

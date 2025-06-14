@@ -9,6 +9,26 @@ local function resolve_action(action_str, actions)
 	return actions[action_str]
 end
 
+local function is_float(win)
+	return vim.api.nvim_win_get_config(win).relative ~= ""
+end
+
+local function check_last_window(window)
+	if not (window and vim.api.nvim_win_is_valid(window)) then
+		return false
+	end
+
+	local wins = vim.api.nvim_tabpage_list_wins(0)
+	local non_floating_wins = {}
+
+	for _, win in ipairs(wins) do
+		if not is_float(win) then
+			table.insert(non_floating_wins, win)
+		end
+	end
+	return #non_floating_wins == 1 and non_floating_wins[1] == window
+end
+
 local function should_redirect_buffer(args)
 	local curr_win = vim.api.nvim_get_current_win()
 	return curr_win == state.win and args.buf ~= state.buf and vim.bo[args.buf].filetype ~= state.buf_filetype
@@ -35,8 +55,7 @@ local function handle_buffer_redirection(args)
 
 	local target_win = nil
 	for _, win in ipairs(vim.api.nvim_list_wins()) do
-		local config = vim.api.nvim_win_get_config(win)
-		if config.relative == "" and win ~= state.win then
+		if not is_float(win) and win ~= state.win then
 			target_win = win
 			break
 		end
@@ -56,28 +75,10 @@ local function handle_buffer_redirection(args)
 	end
 end
 
-local function check_last_window()
-	if not (state.win and vim.api.nvim_win_is_valid(state.win)) then
-		return false
-	end
-
-	local wins = vim.api.nvim_tabpage_list_wins(0)
-	local non_floating_wins = {}
-
-	for _, win in ipairs(wins) do
-		local config = vim.api.nvim_win_get_config(win)
-		if config.relative == "" then
-			table.insert(non_floating_wins, win)
-		end
-	end
-	return #non_floating_wins == 1 and non_floating_wins[1] == state.win
-end
-
 local function handle_window_cleanup()
 	local curr_win = vim.api.nvim_get_current_win()
-	local config = vim.api.nvim_win_get_config(curr_win)
 
-	if curr_win ~= state.win and config.relative == "" then
+	if curr_win ~= state.win and not is_float(curr_win) then
 		vim.api.nvim_win_close(curr_win, false)
 	end
 end
@@ -92,7 +93,7 @@ local function check_modified_buffers()
 end
 
 local function handle_window_enter()
-	if check_last_window() then
+	if check_last_window(state.win) then
 		if check_modified_buffers() then
 			vim.api.nvim_buf_delete(state.buf, { force = true })
 			state.win = nil
@@ -102,10 +103,6 @@ local function handle_window_enter()
 	else
 		handle_window_cleanup()
 	end
-end
-
-local function is_float(win)
-	return vim.api.nvim_win_get_config(win).relative ~= ""
 end
 
 function M.setup_keymaps(buf)
@@ -128,13 +125,15 @@ function M.setup_keymaps(buf)
 	for _, key in ipairs(close_keys) do
 		vim.keymap.set("n", key, function()
 			local curr_win = vim.api.nvim_get_current_win()
-
-			if is_float(curr_win) then
-				require("Otree.float").close_float()
-			elseif state.oil ~= "float" and curr_win == state.win then
-				vim.api.nvim_win_set_buf(state.win, state.buf)
+			if curr_win == state.win or curr_win == require("Otree.float").inner_win_id then
+				if state.oil ~= "float" and curr_win == state.win then
+					vim.api.nvim_win_set_buf(state.win, state.buf)
+				else
+					require("Otree.float").close_float()
+				end
+				actions.refresh()
+				vim.print("HI")
 			end
-			actions.refresh()
 		end, { noremap = true, silent = true })
 	end
 end
@@ -156,9 +155,11 @@ function M.setup_autocmds(buf)
 	vim.api.nvim_create_autocmd("WinResized", {
 		group = augroup,
 		callback = function()
-			if check_last_window() then
+			if check_last_window(state.win) then
 				vim.schedule(function()
-					state.win = nil
+					if vim.api.nvim_get_current_buf() ~= state.buf then
+						state.win = nil
+					end
 				end)
 			end
 		end,
