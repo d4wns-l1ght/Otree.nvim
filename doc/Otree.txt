@@ -21,11 +21,13 @@ CONTENTS                                                  *Otree-contents*
 
 Otree.nvim is a lightweight and customizable file tree explorer for Neovim,  
 built for speed, simplicity, and seamless user experience. It integrates  
-tightly with oil.nvim and nvim-web-devicons to provide an elegant and  
-efficient file navigation workflow.
+tightly with oil.nvim to provide an elegant and  
+efficient file operations workflow.
 
 Features:~  
-• Fast and responsive file tree using `fd` or `fdfind`  
+
+• Fast and responsive file tree using `fd
+• Supports icons from mini.icons, nvim-web-devicons
 • Tight integration with oil.nvim for file operations  
 • Floating window support with adjustable dimensions
 
@@ -34,7 +36,6 @@ Features:~
 
 • Neovim 0.8+  
 • fd or fdfind (file finder utility)  
-• nvim-web-devicons (for file icons)  
 • oil.nvim (for file operations)
 
 ==============================================================================  
@@ -47,6 +48,8 @@ return {
     lazy = false,  
     dependencies = {  
         "stevearc/oil.nvim",  
+        -- { "echasnovski/mini.icons", opts = {} },
+        -- "nvim-tree/nvim-web-devicons",
     },  
     config = function()  
         require("Otree").setup()  
@@ -75,7 +78,9 @@ Default Configuration:~
     show_ignore = false,         -- Show files ignored by .gitignore or fd rules  
     cursorline = true,           -- Highlight the current line in the tree  
     oil = "float",               -- "float" opens Oil in a floating window; any other value opens it in the tree  
+
     ignore_patterns = {},        -- List of glob patterns to hide files/folders  
+
     keymaps = {                  -- See |Otree-keybindings|  
         ["<CR>"] = "actions.select",  
         ["l"] = "actions.select",  
@@ -98,6 +103,7 @@ Default Configuration:~
         ["f"] = "actions.focus_file",  
         ["?"] = "actions.open_help",  
     },  
+
     tree = {  
         space_after_icon = " ",  
         space_after_connector = " ",  
@@ -106,6 +112,7 @@ Default Configuration:~
         connector_middle = "├─",  
         vertical_line = "│",  
     },  
+
     icons = {  
         title = " ",  
 	default_file = "",
@@ -115,6 +122,7 @@ Default Configuration:~
         keymap = "⌨ ",  
         oil = " ",  
     },  
+
     highlights = {  
         directory = "Directory",  
         file = "Normal",  
@@ -123,6 +131,7 @@ Default Configuration:~
         float_normal = "TelescopeNormal",  
         float_border = "TelescopeBorder",  
     },  
+
     float = {  
         center = true,  
         width_ratio = 0.4,  

@@ -1,27 +1,25 @@
 ## 🌲 Otree.nvim
 
-**Otree.nvim** is a lightweight and customizable file tree explorer for [Neovim](https://neovim.io), built for speed, simplicity, and seamless user experience. It integrates tightly with [`oil.nvim`](https://github.com/stevearc/oil.nvim) and [`nvim-web-devicons`](https://github.com/nvim-tree/nvim-web-devicons) to provide an elegant and efficient file navigation workflow.
+**Otree.nvim** is a lightweight and customizable file tree explorer for [Neovim](https://neovim.io), built for speed, simplicity, and seamless user experience. It integrates tightly with [`oil.nvim`](https://github.com/stevearc/oil.nvim) to provide an elegant and efficient file operations workflow.
 
 ---
 
 ## ✨ Features
 
-- **Fast and responsive** file tree using `fd` or `fdfind`
+- **Fast and responsive** file tree using `fd`
 - **Tight integration** with [`oil.nvim`](https://github.com/stevearc/oil.nvim) for file operations
+- **Supports icons** from [mini.icons](https://github.com/echasnovski/mini.icons), [nvim-web-devicons](https://github.com/nvim-tree/nvim-web-devicons), or a **default fallback**
 - **Highly customizable** keybindings and appearance
 - **Optional Netrw hijack** for a cleaner startup experience
 - **Toggle visibility** for hidden and ignored files
 - **Floating window support** with adjustable dimensions
-- **Simple API and commands** for ease of use
-- **Built-in help system** with keymap documentation
 
 ---
 
 ## ⚙️ Requirements
 
 - [Neovim 0.8+](https://neovim.io)
-- [`fd`](https://github.com/sharkdp/fd) or [`fdfind`](https://manpages.ubuntu.com/manpages/focal/man1/fdfind.1.html)
-- [`nvim-web-devicons`](https://github.com/nvim-tree/nvim-web-devicons)
+- [`fd`](https://github.com/sharkdp/fd)
 - [`oil.nvim`](https://github.com/stevearc/oil.nvim)
 
 ---
@@ -35,8 +33,9 @@ return {
     "Eutrius/Otree.nvim",
     lazy = false,
     dependencies = {
-        "nvim-tree/nvim-web-devicons",
         "stevearc/oil.nvim",
+        -- { "echasnovski/mini.icons", opts = {} },
+        -- "nvim-tree/nvim-web-devicons",
     },
     config = function()
         require("Otree").setup()
@@ -186,7 +185,7 @@ If Oil is already configured, Otree respects your existing setup and will not ov
 You can configure how Oil opens using the `oil` option in your Otree setup:
 
 ```lua
-require("otree").setup({
+require("Otree").setup({
   oil = "float"  -- Opens Oil in a floating window (default)
   -- Any other value opens Oil directly inside the tree window
 })
