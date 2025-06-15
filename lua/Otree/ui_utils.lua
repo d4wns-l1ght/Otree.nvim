@@ -132,7 +132,6 @@ function M.setup_keymaps(buf)
 					require("Otree.float").close_float()
 				end
 				actions.refresh()
-				vim.print("HI")
 			end
 		end, { noremap = true, silent = true })
 	end
