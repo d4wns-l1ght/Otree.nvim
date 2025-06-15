@@ -376,8 +376,8 @@ function M.oil_dir()
 				break
 			end
 		end
-		require("Otree.oil").open_oil(path, node_index)
 	end
+	require("Otree.oil").open_oil(path, node_index)
 end
 
 function M.oil_into_dir()
@@ -389,8 +389,8 @@ function M.oil_into_dir()
 		else
 			return
 		end
-		require("Otree.oil").open_oil(path)
 	end
+	require("Otree.oil").open_oil(path)
 end
 
 function M.toggle_hidden()
