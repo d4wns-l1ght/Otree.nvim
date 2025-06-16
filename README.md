@@ -2,7 +2,11 @@
 
 **Otree.nvim** is a lightweight and customizable file tree explorer for [Neovim](https://neovim.io), built for speed, simplicity, and seamless user experience. It integrates tightly with [`oil.nvim`](https://github.com/stevearc/oil.nvim) to provide an elegant and efficient file operations workflow.
 
+<video src="https://private-user-images.githubusercontent.com/24679992/455416305-dd4ef477-4890-4c9b-9be5-cd6efef356fd.mp4?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3NTAwNjM5OTYsIm5iZiI6MTc1MDA2MzY5NiwicGF0aCI6Ii8yNDY3OTk5Mi80NTU0MTYzMDUtZGQ0ZWY0NzctNDg5MC00YzliLTliZTUtY2Q2ZWZlZjM1NmZkLm1wND9YLUFtei1BbGdvcml0aG09QVdTNC1ITUFDLVNIQTI1NiZYLUFtei1DcmVkZW50aWFsPUFLSUFWQ09EWUxTQTUzUFFLNFpBJTJGMjAyNTA2MTYlMkZ1cy1lYXN0LTElMkZzMyUyRmF3czRfcmVxdWVzdCZYLUFtei1EYXRlPTIwMjUwNjE2VDA4NDgxNlomWC1BbXotRXhwaXJlcz0zMDAmWC1BbXotU2lnbmF0dXJlPWUwYzE5NTEwMTE2MzYyYzRmMjUzZWRlNWU4ZmJiMTEwZGYzMmM2YTdjNGRlNTYxMTIyMThhNWVkNDY4MzgwNWUmWC1BbXotU2lnbmVkSGVhZGVycz1ob3N0In0.PiRiw9Sj13iIfVwE2rPTsxw-SU2VszXOtAMMT5GkKmk" controls="controls" style="max-width: 730px;">
+</video>
+
 ---
+
 
 ## ✨ Features
 
