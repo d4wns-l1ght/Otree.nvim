@@ -187,4 +187,10 @@ function M.setup(opts)
 	return M
 end
 
+-- Export tree view functions so that users can write custom keymaps without using vim.cmd
+M = vim.tbl_extend("keep", M, {
+	toggle_tree = actions.toggle_tree,
+	focus_tree = actions.focus_tree,
+})
+
 return M
