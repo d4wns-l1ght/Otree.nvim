@@ -82,7 +82,7 @@ end
 
 function M.scan_dir(dir)
 	dir = dir or vim.fn.getcwd()
-	local cmd = { state.fd, "--max-depth", "1", "--absolute-path", "-t", "f", "-t", "d" }
+	local cmd = { state.fd, "--max-depth", "1", "--absolute-path", "-t", "f", "-t", "d", "-t", "l" }
 	if state.show_hidden then
 		table.insert(cmd, "--hidden")
 	end
